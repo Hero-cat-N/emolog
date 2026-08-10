@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,30 +7,45 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useState } from "react";
+import * as z from "zod";
+
+const postSchema = z.object({ 
+  today: z.string().nonempty({ message: '今日やったことを入力してください' }), 
+  good: z.string().min(1), 
+  tomorrow: z.string().min(1), 
+  mood: z.enum(["fun", "normal", "sad", "frustrate"]) }); // 4つの値のどれかじゃないとだめ
 
 export default function Post() {
   const [form, setForm] = useState({
     today: "",
     good: "",
     tomorrow: "",
-    mood: "normal"
-  })
+    mood: "normal",
+  });
+
+  const [errors, setErrors] = useState<string[]>([])
 
   const inputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
+    const { id, value } = e.target;
     // ヒント: e.target から id と value を取り出して、
     // setForm(prev => ({ ...prev, [id]: value })) のように既存の値を保ちつつ更新する
-    setForm(prev => ({ ...prev, [id]: value}))
+    setForm((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const moodChange = (value: string[]) => {
+    setForm((prev) => ({ ...prev, mood: value[0] }));
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const result = postSchema.safeParse(form);
+    console.log(result);
   }
-  
-  const moodChange = (value: string[]) => { 
-    setForm(prev => ({...prev, mood: value[0]}))
-   }
 
   return (
     <div className="max-w-7xl px-4 py-8">
       <h2 className="text-2xl mb-8 font-bold">今日の記録</h2>
-      <form>
+      <form onSubmit={handleSubmit}>
         <div className="grid gap-8 py-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="today">今日やったこと</Label>
@@ -68,7 +83,7 @@ export default function Post() {
           </ToggleGroup>
           <Separator />
           <div className="flex justify-end py-4">
-            <Button className="p-4">保存する</Button>
+            <Button type="submit" className="p-4">保存する</Button>
           </div>
         </section>
       </form>
