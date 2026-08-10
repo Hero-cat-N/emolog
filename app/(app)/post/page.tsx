@@ -17,11 +17,15 @@ export default function Post() {
   })
 
   const inputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, }
+    const { id, value } = e.target
     // ヒント: e.target から id と value を取り出して、
     // setForm(prev => ({ ...prev, [id]: value })) のように既存の値を保ちつつ更新する
-    setForm(e.target.value)
+    setForm(prev => ({ ...prev, [id]: value}))
   }
+  
+  const moodChange = (value: string[]) => { 
+    setForm(prev => ({...prev, mood: value[0]}))
+   }
 
   return (
     <div className="max-w-7xl px-4 py-8">
@@ -31,24 +35,24 @@ export default function Post() {
           <div className="flex flex-col gap-2">
             <Label htmlFor="today">今日やったこと</Label>
             {/* ヒント: onChange={inputChange} を渡して today を更新する */}
-            <Input onChange={} value={form.today} id="today" type="text" placeholder="今日やったこと" required />
+            <Input onChange={inputChange} value={form.today} id="today" type="text" placeholder="今日やったこと" required />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="today">よかったこと</Label>
             {/* ヒント: onChange={inputChange} を渡して good を更新する */}
-            <Input onChange={} value={form.good} id="good" type="text" placeholder="よかったこと" required />
+            <Input onChange={inputChange} value={form.good} id="good" type="text" placeholder="よかったこと" required />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="today">あしたやること</Label>
             {/* ヒント: onChange={inputChange} を渡して tomorrow を更新する */}
-            <Input onChange={} value={form.tomorrow} id="tomorrow" type="text" placeholder="あしたやること" required />
+            <Input onChange={inputChange} value={form.tomorrow} id="tomorrow" type="text" placeholder="あしたやること" required />
           </div>
         </div>
         <Separator />
         <section className="py-4">
           <h3 className="mb-4 font-bold">今日の気分</h3>
           {/* ヒント: mood 選択用の onValueChange ハンドラを作って渡す（ToggleGroup は string[] を返すので注意） */}
-          <ToggleGroup className="pb-4 justify-between" size="sm" defaultValue={[form.mood]} variant="outline" spacing={4} onValueChange={}>
+          <ToggleGroup className="pb-4 justify-between" size="sm" value={[form.mood]} variant="outline" spacing={4} onValueChange={moodChange}>
             <ToggleGroupItem className="p-4" value="fun" aria-label="Toggle fun">
               😄楽しい
             </ToggleGroupItem>
