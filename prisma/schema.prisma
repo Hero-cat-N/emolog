@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 感情マスタ。code はアプリのロジック(zodのenumなど)から参照する識別子、
+// label は画面表示用。列構成は仮置きなので実際の設計に合わせて調整する
+model Emotion {
+  id    Int    @id @default(autoincrement()) @db.SmallInt
+  code  String @unique
+  label String
+
+  logs Log[]
+
+  @@map("emotions")
+}
+
+model Log {
+  id     BigInt @id @default(autoincrement())
+  // usersテーブルが未実装のため、今はFKを張らずNULL許容の列のみ用意している。
+  // 認証を実装する段階でUserモデル・リレーション追加とNOT NULL化を行う
+  userId BigInt? @map("user_id")
+
+  emotionId Int?     @map("emotion_id") @db.SmallInt
+  emotion   Emotion? @relation(fields: [emotionId], references: [id])
+
+  didToday     String   @map("did_today")
+  goodThing    String   @map("good_thing")
+  badThing     String?  @map("bad_thing")
+  tomorrowPlan String   @map("tomorrow_plan")
+  loggedDate   DateTime @map("logged_date") @db.Date
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, loggedDate])
+  @@map("logs")
+}
