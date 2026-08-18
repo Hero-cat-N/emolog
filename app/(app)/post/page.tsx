@@ -36,7 +36,16 @@ export default function Post() {
   return (
     <div className="max-w-7xl px-4 py-8">
       <h2 className="text-2xl mb-8 font-bold">今日の記録</h2>
-      <form onSubmit={form.handleSubmit((data) => console.log(data))}>
+      <form onSubmit={form.handleSubmit((data) => {
+        // note: 今までの記録を読みだす ノートを開いて、今まで書いてある内容を取り出す
+        const saved = localStorage.getItem("emolog_logs");
+        // note: ノートに何か書いてあれば、読める形(配列)に戻す。何も無ければ、空っぽのリスト[]からスタートする
+        const existing = saved ? JSON.parse(saved) : [];
+
+        // note: 今まであった日記のリスト(existing)に、今回書いた新しい1件を追加した、新しいリストを作る
+        const newLogs = [...existing, { ...data, id: crypto.randomUUID(), createdAt: new Date().toISOString() }]
+        localStorage.setItem("emolog_logs", JSON.stringify(newLogs));
+      })}>
         <div className="grid gap-8 py-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="today">今日やったこと</Label>
