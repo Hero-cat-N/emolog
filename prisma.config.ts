@@ -11,6 +11,7 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    seed: "tsx prisma/seed.ts",
   },
   datasource: {
     // migrate はプールされた接続(pgbouncer, ポート6543)だと prepared statement が
