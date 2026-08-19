@@ -55,6 +55,19 @@
   - `orderBy: { created_at: ... }`もエラー。クエリで使うのは`@map`前のPrisma側フィールド名(`createdAt`)で、DBの実列名を直接書くものではないと理解した
   - `@prisma/client`をインストールしていなかったため`Module not found: Can't resolve '@prisma/client/runtime/client'`が発生。出力先を指定するdriver adapter方式でも、共通ランタイムは`@prisma/client`パッケージ本体に依存していた
 
+### 2026-08-19 `ac7d260` emotionsマスタへのシードデータ投入とPOST /api/logsを実装
+- `prisma/seed.ts`で`emotions`(fun/normal/sad/frustrate)を投入する仕組みを用意し、`prisma.config.ts`に配線(`prisma db seed`で実行)
+- `app/api/logs/route.ts`にPOSTハンドラを追加。zodで再検証 → `mood`から対応する`Emotion`を検索して`emotionId`に変換 → `prisma.log.create`
+- `postSchema`を`lib/validations/post.ts`に切り出し、クライアント/サーバーで二重管理にならないようにした
+
+### 2026-08-19 `9f27646` 投稿フォームをPOST /api/logsに接続
+- 送信処理をlocalStorageから`fetch`によるAPI呼び出しに置き換え、失敗時は`form.setError("root", ...)`、成功時のみ`form.reset()`
+- `isSubmitting`で送信中はボタンを`disabled`にし、文言を「保存中…」に出し分け
+- 実際にフォームから送信し、Supabaseに実データが保存されることを確認
+- **つまずいた点**:
+  - `fetch`の戻り値を`await`で受け取らず`res.ok`を参照してしまい、「`res`が定義されていない」エラーになった。`const res = await fetch(...)`のように、戻り値を変数で受け取る必要があると理解した
+  - `form.reset()`が`if`ブロックの外にあり、保存に失敗した場合でも実行されてしまう(エラーは出るのに入力内容も消える)バグに気づき、`if`の中で`return`することで成功時だけ`reset`されるように修正した
+
 ## この期間で身につけたこと
 
 - Reactのスコープ(モジュールスコープ / コンポーネントのレンダースコープ / イベントハンドラ)とHooksのルール
@@ -65,8 +78,6 @@
 
 ## 次にやりたいこと
 
-- `app/api/logs/route.ts`にPOST(保存)ハンドラを実装(zodでの再検証 + `prisma.log.create`)
-- `post/page.tsx`の送信処理をlocalStorageからPOST `/api/logs`の呼び出しに置き換え、送信中/成功/失敗の状態をUIに反映
 - 入力内容の確認画面(送信前に内容を見せてから確定するフロー)
 - エラーメッセージのスタイル調整
 - (将来)認証の実装、一覧画面での記録表示
