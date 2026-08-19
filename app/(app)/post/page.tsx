@@ -18,7 +18,7 @@ export default function Post() {
   // note: まず、変数form と
   const form = useForm({
     resolver: zodResolver(postSchema),
-    defaultValues: { today: "", good: "", tomorrow: "", mood: "normal" as const },
+    defaultValues: { today: "", good: "", tomorrow: "", bad: "", mood: "normal" as const },
   });
 
   // note: ② テキスト入力はregisterで繋ぐ
@@ -69,6 +69,12 @@ export default function Post() {
             {/* ヒント: onChange={inputChange} を渡して tomorrow を更新する */}
             <Input {...form.register("tomorrow")} id="tomorrow" type="text" placeholder="あしたやること" />
             {form.formState.errors.tomorrow && <p className="text-sm text-red-500">{form.formState.errors.tomorrow.message}</p>}
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="bad">モヤモヤしたこと</Label>
+            {/* ヒント: onChange={inputChange} を渡して bad を更新する */}
+            <Input {...form.register("bad")} id="bad" type="text" placeholder="モヤモヤしたこと" />
+            {form.formState.errors.bad && <p className="text-sm text-red-500">{form.formState.errors.bad.message}</p>}
           </div>
         </div>
         <Separator />

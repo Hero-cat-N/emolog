@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: z.treeifyError(parsed.error) }, { status: 400 })
   }
 
-  const { today, good, tomorrow, mood } = parsed.data
+  const { today, good, tomorrow, bad, mood } = parsed.data
 
   try {
     const emotion = await prisma.emotion.findUnique({ where: { code: mood } })
@@ -22,6 +22,7 @@ export async function POST(request: Request) {
         didToday: today,
         goodThing: good,
         tomorrowPlan: tomorrow,
+        badThing: bad,
         loggedDate: new Date(),
         emotionId: emotion?.id,
       },
