@@ -40,3 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 emolog_wired.html
+
+/lib/generated/prisma
