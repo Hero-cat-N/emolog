@@ -41,4 +41,7 @@ yarn-error.log*
 next-env.d.ts
 emolog_wired.html
 
+# local notes (not committed)
+/notes/
+
 /lib/generated/prisma
