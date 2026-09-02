@@ -16,6 +16,7 @@ import {
 export function LogsCarousel({ logs }: { logs: LogView[] }) {
   // 何枚目を表示しているか。最初は一番新しい記録（＝配列の末尾）を出す
   const [index, setIndex] = useState(logs.length - 1);
+  const safeIndex = Math.min(index, logs.length - 1);
 
   const older = logs[index - 1]; // 1つ古い記録（左ボタンで戻る）。無ければ undefined
   const newer = logs[index + 1]; // 1つ新しい記録（右ボタンで進む）。無ければ undefined
@@ -28,7 +29,7 @@ export function LogsCarousel({ logs }: { logs: LogView[] }) {
             transition-transform が付いているので translateX が変わると勝手にスライドする */}
         <div
           className="flex transition-transform duration-300 ease-out"
-          style={{ transform: `translateX(-${index * 100}%)` }}
+          style={{ transform: `translateX(-${safeIndex * 100}%)` }}
         >
           {logs.map((log) => (
             // ③ 1枚の幅を親いっぱい(w-full)に固定して横に積む。shrink-0 で縮ませない
@@ -41,7 +42,7 @@ export function LogsCarousel({ logs }: { logs: LogView[] }) {
 
       {/* スライドしない固定パネル（AI分析 + アクション） */}
       <div className="mt-3">
-        <LogCardPanel />
+        <LogCardPanel logId={logs[safeIndex].id} />
       </div>
 
       {/* 最下部の前へ／次へ */}
@@ -51,7 +52,7 @@ export function LogsCarousel({ logs }: { logs: LogView[] }) {
       </div>
 
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        {index + 1} / {logs.length}
+        {safeIndex + 1} / {logs.length}
       </p>
     </div>
   );

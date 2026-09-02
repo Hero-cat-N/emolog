@@ -3,6 +3,8 @@ import { ArrowRight, Copy, Ellipsis, Share2, Sparkles, SquarePen, Trash2 } from 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import { useRouter } from "next/navigation";
+
 // サーバ(page.tsx)からクライアントに渡すログ1件の形。
 // Prisma の Log をそのまま渡すと BigInt が混ざって渡せないので、必要な項目だけの素のオブジェクトにする
 export type LogView = {
@@ -47,11 +49,7 @@ function LogSection({ label, value }: { label: string; value?: string | null }) 
   return (
     <div className="border-t border-border px-5 py-4">
       <p className="mb-1 text-xs font-bold text-muted-foreground">{label}</p>
-      {value ? (
-        <p className="text-sm leading-relaxed text-foreground">{value}</p>
-      ) : (
-        <p className="text-sm text-muted-foreground">記録なし</p>
-      )}
+      {value ? <p className="text-sm leading-relaxed text-foreground">{value}</p> : <p className="text-sm text-muted-foreground">記録なし</p>}
     </div>
   );
 }
@@ -81,16 +79,11 @@ export function LogCard({ log }: { log: LogView }) {
 
       {/* 感情 */}
       <div className="flex items-center gap-3 border-t border-border px-5 py-4">
-        <span
-          className="flex size-11 shrink-0 items-center justify-center rounded-full text-xl"
-          style={{ backgroundColor: emotion.tint }}
-        >
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-full text-xl" style={{ backgroundColor: emotion.tint }}>
           {emotion.emoji}
         </span>
         <div>
-          <p className="font-heading text-base font-bold text-foreground">
-            {log.emotionLabel ?? "未設定"}
-          </p>
+          <p className="font-heading text-base font-bold text-foreground">{log.emotionLabel ?? "未設定"}</p>
           <p className="text-xs text-muted-foreground">
             自動判定・<span className="text-accent-foreground">手動で変更する</span>
           </p>
@@ -99,9 +92,7 @@ export function LogCard({ log }: { log: LogView }) {
 
       {/* タグ（プレースホルダー：タグ機能は未実装） */}
       <div className="flex flex-wrap items-center gap-2 border-t border-border px-5 py-4">
-        <span className="inline-flex items-center rounded-full border border-dashed border-border px-3 py-1 text-xs text-muted-foreground">
-          ＋タグを追加
-        </span>
+        <span className="inline-flex items-center rounded-full border border-dashed border-border px-3 py-1 text-xs text-muted-foreground">＋タグを追加</span>
       </div>
 
       {/* 本文4項目 */}
@@ -116,7 +107,14 @@ export function LogCard({ log }: { log: LogView }) {
 // ── 固定パネル（AI分析 + アクション）。スライドせず一番下に置きっぱなしにする ──
 // note: いまは中身が全ログ共通のプレースホルダーなので固定でよい。
 //       AI分析に実データを入れる段階で「表示中のログ」を受け取る形に戻す想定
-export function LogCardPanel() {
+export function LogCardPanel({ logId }: { logId: string }) {
+  const router = useRouter();
+  async function handleDelete() {
+    if (!confirm("このログを削除しますか?")) return;
+    await fetch(`/api/logs/${logId}`, { method: "DELETE" });
+    router.push("/logs");
+  }
+
   return (
     <div className="overflow-hidden rounded-[22px] border border-[#F0E7D8] bg-card shadow-[0_1px_3px_rgba(58,26,8,0.10)]">
       {/* AI分析（プレースホルダー：生成処理は未実装）。
@@ -125,10 +123,7 @@ export function LogCardPanel() {
         <div className="mb-3 flex items-center gap-2">
           <Sparkles className="size-4 text-accent-foreground" />
           <span className="font-heading text-sm font-bold text-accent-foreground">AI 分析</span>
-          <Badge
-            variant="outline"
-            className="border-accent-foreground/30 bg-transparent text-accent-foreground"
-          >
+          <Badge variant="outline" className="border-accent-foreground/30 bg-transparent text-accent-foreground">
             自動生成
           </Badge>
         </div>
@@ -161,7 +156,7 @@ export function LogCardPanel() {
             <Copy /> テキストをコピー
           </Button>
         </div>
-        <Button variant="destructive" className="h-11 w-full rounded-xl" disabled>
+        <Button variant="destructive" className="h-11 w-full rounded-xl" onClick={handleDelete}>
           <Trash2 /> このログを削除
         </Button>
       </div>
