@@ -2,49 +2,19 @@
 
 import { ArrowRight, Copy, Ellipsis, Share2, Sparkles, SquarePen, Trash2 } from "lucide-react";
 
+import { useRouter } from "next/navigation";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import { useRouter } from "next/navigation";
-
-// サーバ(page.tsx)からクライアントに渡すログ1件の形。
-// Prisma の Log をそのまま渡すと BigInt が混ざって渡せないので、必要な項目だけの素のオブジェクトにする
-export type LogView = {
-  id: string;
-  loggedDate: Date;
-  emotionCode: string | null;
-  emotionLabel: string | null;
-  didToday: string;
-  goodThing: string;
-  badThing: string | null;
-  tomorrowPlan: string;
-};
-
-// 感情コードごとの表示設定。
-// emoji は「感情そのもの」を表すコンテンツなので絵文字を使う（design.md 7節）。
-// tint はカード上部の感情バッジ用の背景色。ベタ塗りせず感情色のティントにする（design.md 7節）。
-export const EMOTION_UI: Record<string, { emoji: string; tint: string }> = {
-  fun: { emoji: "😄", tint: "#E3F3EA" },
-  normal: { emoji: "😐", tint: "#EFEBE4" },
-  sad: { emoji: "😞", tint: "#E6ECF7" },
-  frustrate: { emoji: "😤", tint: "#FBEEE7" },
-  tired: { emoji: "😴", tint: "#EEEAF6" },
-};
-export const EMOTION_FALLBACK = { emoji: "🙂", tint: "#EFEBE4" };
-
-const WEEKDAY = ["日", "月", "火", "水", "木", "金", "土"];
-
-// logged_date は日付のみの列。サーバのタイムゾーンで日付がずれないよう UTC で読む
-export function formatLoggedDate(date: Date) {
-  const month = date.getUTCMonth() + 1;
-  const day = date.getUTCDate();
-  const weekday = WEEKDAY[date.getUTCDay()];
-  return {
-    ymd: `${date.getUTCFullYear()}/${month}/${day}`,
-    weekday: `${weekday}曜日`,
-    short: `${month}/${day}（${weekday}）`,
-  };
-}
+// 純粋なヘルパー（LogView 型 / EMOTION_UI / formatLoggedDate 等）は log-card-utils.ts にある。
+// Server Component から使うものを "use client" のこのファイルに置くと呼び出せなくなるため分離した。
+import {
+  EMOTION_FALLBACK,
+  EMOTION_UI,
+  formatLoggedDate,
+  type LogView,
+} from "./log-card-utils";
 
 // 本文4項目の1ブロック。値が空なら「記録なし」を薄く出す
 function LogSection({ label, value }: { label: string; value?: string | null }) {
