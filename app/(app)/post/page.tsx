@@ -1,121 +1,184 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { PageTabs } from "../_components/page-tabs";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-// note: ③ ToggleGroup(独自コンポーネント)はControllerを使う
-import { Controller } from "react-hook-form";
 
 import { postSchema } from "@/lib/validations/post";
 
+// note:① useForm でフォームを作る / ② テキストは register で繋ぐ / ③ ToggleGroup は Controller
+
+// 気分の選択肢。value は postSchema の z.enum と一致させる（見た目のラベルだけ変更可）
+const MOODS = [
+  { value: "fun", emoji: "😄", label: "楽しい" },
+  { value: "normal", emoji: "😐", label: "普通" },
+  { value: "sad", emoji: "😞", label: "悲しい" },
+  { value: "frustrate", emoji: "😤", label: "イライラ" },
+] as const;
+
 export default function Post() {
-  // note:① useFormでフォームを作る(useState(form)の代わり)
-  // note: まず、変数form と
   const form = useForm({
     resolver: zodResolver(postSchema),
     defaultValues: { today: "", good: "", tomorrow: "", bad: "", mood: "normal" as const },
   });
 
-  // note: ② テキスト入力はregisterで繋ぐ
-  // note: <Input {...form.register("today")} id="today" type="text" placeholder="今日やったこと" />
+  // ヘッダーの日付。SSR とクライアントで差が出ないよう mount 後にセットする
+  const [dateLabel, setDateLabel] = useState("");
+  useEffect(() => {
+    setDateLabel(
+      new Intl.DateTimeFormat("ja-JP", {
+        month: "numeric",
+        day: "numeric",
+        weekday: "short",
+      }).format(new Date())
+    );
+  }, []);
+
+  // フッターの文字数（テキスト項目の合計）
+  const values = form.watch();
+  const charCount =
+    (values.today?.length ?? 0) +
+    (values.good?.length ?? 0) +
+    (values.bad?.length ?? 0) +
+    (values.tomorrow?.length ?? 0);
+
   return (
-    <div className="max-w-7xl px-4 py-8">
-      <h2 className="text-2xl mb-8 font-bold">今日の記録</h2>
-      <form
-        onSubmit={form.handleSubmit(async (data) => {
-          // ヒント①: fetch("/api/logs", { method: "POST",
-          //  headers: { "Content-Type": "application/json" },
-          //  body: JSON.stringify(data) });
-          //         コールバックをasyncにしたのは、fetchの完了を待つため(このasync化だけで
-          //         下のisSubmittingが自動的に「送信中はtrue」になる、react-hook-formの機能)
-          const res = await fetch("/api/logs", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-          });
+    <div className="flex min-h-screen justify-center bg-background px-4 py-8">
+      <div className="w-full max-w-md overflow-hidden rounded-3xl border bg-card shadow-sm">
+        {/* ヘッダー */}
+        <header className="flex items-center justify-between px-6 pt-6 pb-4">
+          <h2 className="font-heading text-xl font-bold">今日の記録</h2>
+          <span className="text-sm text-muted-foreground">{dateLabel}</span>
+        </header>
 
-          // ヒント②: res.ok が false(=APIがエラーを返した)場合は、フォームにエラーを記録する
-          //         form.setError("root", { message: "保存に失敗しました" })
-          //         (fieldごとのエラーと違い、フォーム全体のエラーは "root" という特別な名前で管理する)
-          if(!res.ok) {
-            form.setError("root", { message: "保存に失敗しました" });
-            return;
-          }
+        <PageTabs />
 
-          // ヒント③: 成功したら form.reset() でフォームを空の状態に戻す
-          form.reset();
-        })}
-      >
-        <div className="grid gap-8 py-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="today">今日やったこと</Label>
-            {/* ヒント: onChange={inputChange} を渡して today を更新する */}
-            <Input {...form.register("today")} id="today" type="text" placeholder="今日やったこと" />
-            {form.formState.errors.today && <p className="text-sm text-red-500">{form.formState.errors.today.message}</p>}
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="good">よかったこと</Label>
-            {/* ヒント: onChange={inputChange} を渡して good を更新する */}
-            <Input {...form.register("good")} id="good" type="text" placeholder="よかったこと" />
-            {form.formState.errors.good && <p className="text-sm text-red-500">{form.formState.errors.good.message}</p>}
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="tomorrow">あしたやること</Label>
-            {/* ヒント: onChange={inputChange} を渡して tomorrow を更新する */}
-            <Input {...form.register("tomorrow")} id="tomorrow" type="text" placeholder="あしたやること" />
-            {form.formState.errors.tomorrow && <p className="text-sm text-red-500">{form.formState.errors.tomorrow.message}</p>}
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="bad">モヤモヤしたこと</Label>
-            {/* ヒント: onChange={inputChange} を渡して bad を更新する */}
-            <Input {...form.register("bad")} id="bad" type="text" placeholder="モヤモヤしたこと" />
-            {form.formState.errors.bad && <p className="text-sm text-red-500">{form.formState.errors.bad.message}</p>}
-          </div>
-        </div>
-        <Separator />
-        <section className="py-4">
-          <h3 className="mb-4 font-bold">今日の気分</h3>
-          {/* ヒント: mood 選択用の onValueChange ハンドラを作って渡す（ToggleGroup は string[] を返すので注意） */}
+        <form
+          className="px-6 py-5"
+          onSubmit={form.handleSubmit(async (data) => {
+            const res = await fetch("/api/logs", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            });
 
-          <Controller
-            control={form.control}
-            name="mood"
-            render={({ field }) => (
-              <ToggleGroup className="pb-4 justify-between" size="sm" value={[field.value]} variant="outline" spacing={4} onValueChange={(v) => field.onChange(v[0])}>
-                <ToggleGroupItem className="p-4" value="fun" aria-label="Toggle fun">
-                  😄楽しい
-                </ToggleGroupItem>
-                <ToggleGroupItem className="p-4" value="normal" aria-label="Toggle normal">
-                  😐普通
-                </ToggleGroupItem>
-                <ToggleGroupItem className="p-4" value="sad" aria-label="Toggle sad">
-                  😞悲しい
-                </ToggleGroupItem>
-                <ToggleGroupItem className="p-4" value="frustrate" aria-label="Toggle frustrate">
-                  😤モヤモヤ
-                </ToggleGroupItem>
-              </ToggleGroup>
-            )}
-          ></Controller>
+            if (!res.ok) {
+              form.setError("root", { message: "保存に失敗しました" });
+              return;
+            }
 
-          <Separator />
-          {/* ヒント: form.formState.errors.root?.message があれば、今までのfield単位のエラー表示と
-              同じ要領で <p className="text-sm text-red-500">...</p> を出す */}
-          <p className="text-sm text-red-500">{form.formState.errors.root?.message}</p>
-          <div className="flex justify-end py-4">
-            {/* ヒント: disabled={form.formState.isSubmitting} を付けると送信中の二重送信を防げる。
-                ボタンの文字も isSubmitting ? "保存中..." : "保存する" のように出し分けられる */}
-            <Button type="submit" className="p-4" disabled={form.formState.isSubmitting}>
+            form.reset();
+          })}
+        >
+          <div className="grid gap-5">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="today" className="flex items-center gap-2">
+                今日やったこと
+                <Badge className="bg-accent text-accent-foreground">必須</Badge>
+              </Label>
+              <Input {...form.register("today")} id="today" type="text" placeholder="今日やったこと" />
+              {form.formState.errors.today && (
+                <p className="text-sm text-destructive">{form.formState.errors.today.message}</p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="good" className="flex items-center gap-2">
+                良かったこと
+                <Badge className="bg-accent text-accent-foreground">必須</Badge>
+              </Label>
+              <Input {...form.register("good")} id="good" type="text" placeholder="良かったこと" />
+              {form.formState.errors.good && (
+                <p className="text-sm text-destructive">{form.formState.errors.good.message}</p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="bad" className="flex items-center gap-2">
+                モヤったこと
+                <Badge variant="secondary">任意</Badge>
+              </Label>
+              <Input {...form.register("bad")} id="bad" type="text" placeholder="なし" />
+              {form.formState.errors.bad && (
+                <p className="text-sm text-destructive">{form.formState.errors.bad.message}</p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="tomorrow" className="flex items-center gap-2">
+                明日やること
+                <Badge className="bg-accent text-accent-foreground">必須</Badge>
+              </Label>
+              <Input
+                {...form.register("tomorrow")}
+                id="tomorrow"
+                type="text"
+                placeholder="明日やること"
+              />
+              {form.formState.errors.tomorrow && (
+                <p className="text-sm text-destructive">{form.formState.errors.tomorrow.message}</p>
+              )}
+            </div>
+          </div>
+
+          <Separator className="my-5" />
+
+          <section>
+            <h3 className="mb-3 font-bold">今日の気分</h3>
+            <Controller
+              control={form.control}
+              name="mood"
+              render={({ field }) => (
+                <ToggleGroup
+                  className="w-full justify-between gap-2"
+                  variant="outline"
+                  spacing={2}
+                  value={[field.value]}
+                  onValueChange={(val) => field.onChange(val[0])}
+                >
+                  {MOODS.map((mood) => (
+                    <ToggleGroupItem
+                      key={mood.value}
+                      value={mood.value}
+                      aria-label={mood.label}
+                      className="flex h-auto flex-1 flex-col gap-1 rounded-xl py-3 aria-pressed:border-primary aria-pressed:bg-accent aria-pressed:text-accent-foreground"
+                    >
+                      <span className="text-2xl">{mood.emoji}</span>
+                      <span className="text-xs">{mood.label}</span>
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              )}
+            />
+          </section>
+
+          <Separator className="my-5" />
+
+          {form.formState.errors.root?.message && (
+            <p className="mb-3 text-sm text-destructive">{form.formState.errors.root.message}</p>
+          )}
+
+          {/* フッター */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">{charCount}文字</span>
+            <Button
+              type="submit"
+              className="h-12 rounded-xl px-8 text-base"
+              disabled={form.formState.isSubmitting}
+            >
               {form.formState.isSubmitting ? "保存中…" : "保存する"}
             </Button>
           </div>
-        </section>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

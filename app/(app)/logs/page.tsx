@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { PageTabs } from "../_components/page-tabs";
 import { LogsCarousel } from "./logs-carousel";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +25,8 @@ export default async function LogsPage() {
 
   return (
     <main className="mx-auto w-full max-w-115 px-4 py-6">
-      <h1 className="px-1 font-heading text-xl font-bold text-foreground">ログ一覧</h1>
+      <PageTabs />
+      <h1 className="mt-4 px-1 font-heading text-xl font-bold text-foreground">ログ一覧</h1>
       <p className="mt-1 mb-4 px-1 text-xs text-muted-foreground">
         ※ タグ・AI分析・シェア・削除は表示のみ（機能は準備中）
       </p>
