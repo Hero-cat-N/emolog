@@ -4,14 +4,13 @@ import { ChevronLeft, ChevronRight, Ellipsis, SquarePen } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
+import { LogCard, LogCardPanel } from "../log-card";
 import {
   EMOTION_FALLBACK,
   EMOTION_UI,
   formatLoggedDate,
-  LogCard,
-  LogCardPanel,
   type LogView,
-} from "../log-card";
+} from "../log-card-utils";
 
 export const dynamic = "force-dynamic";
 

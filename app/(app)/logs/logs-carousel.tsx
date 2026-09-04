@@ -3,14 +3,13 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import { LogCard, LogCardPanel } from "./log-card";
 import {
   EMOTION_FALLBACK,
   EMOTION_UI,
   formatLoggedDate,
-  LogCard,
-  LogCardPanel,
   type LogView,
-} from "./log-card";
+} from "./log-card-utils";
 
 // logs は「古い→新しい」の順で渡ってくる前提（page.tsx で loggedDate 昇順に取得）
 export function LogsCarousel({ logs }: { logs: LogView[] }) {
