@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowRight, Copy, Ellipsis, Share2, Sparkles, SquarePen, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -55,30 +57,35 @@ function LogSection({ label, value }: { label: string; value?: string | null }) 
 }
 
 // ── スライドする部分（日付・感情・タグ・本文4項目）。日付ごとに中身が変わる ──
-export function LogCard({ log }: { log: LogView }) {
+// hideHeader: 詳細ページなど、外側に別の日付ヘッダーがある場合に内側のヘッダーを隠す
+export function LogCard({ log, hideHeader = false }: { log: LogView; hideHeader?: boolean }) {
   const emotion = (log.emotionCode && EMOTION_UI[log.emotionCode]) || EMOTION_FALLBACK;
   const { ymd, weekday } = formatLoggedDate(log.loggedDate);
 
   return (
     <article className="overflow-hidden rounded-[22px] border border-[#F0E7D8] bg-card shadow-[0_1px_3px_rgba(58,26,8,0.10)]">
       {/* ヘッダー：日付 + 操作アイコン */}
-      <div className="flex items-center justify-between px-5 pt-5 pb-3">
-        <div>
-          <p className="font-accent text-lg leading-none font-bold text-foreground">{ymd}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{weekday}</p>
+      {!hideHeader && (
+        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+          <div>
+            <p className="font-accent text-lg leading-none font-bold text-foreground">{ymd}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{weekday}</p>
+          </div>
+          <div className="flex items-center gap-1 text-[#6E5847]">
+            <Button variant="ghost" size="icon-sm" aria-label="編集" disabled>
+              <SquarePen />
+            </Button>
+            <Button variant="ghost" size="icon-sm" aria-label="メニュー" disabled>
+              <Ellipsis />
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-1 text-[#6E5847]">
-          <Button variant="ghost" size="icon-sm" aria-label="編集" disabled>
-            <SquarePen />
-          </Button>
-          <Button variant="ghost" size="icon-sm" aria-label="メニュー" disabled>
-            <Ellipsis />
-          </Button>
-        </div>
-      </div>
+      )}
 
       {/* 感情 */}
-      <div className="flex items-center gap-3 border-t border-border px-5 py-4">
+      <div
+        className={`flex items-center gap-3 px-5 py-4 ${hideHeader ? "" : "border-t border-border"}`}
+      >
         <span className="flex size-11 shrink-0 items-center justify-center rounded-full text-xl" style={{ backgroundColor: emotion.tint }}>
           {emotion.emoji}
         </span>
