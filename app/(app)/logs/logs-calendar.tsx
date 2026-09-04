@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { EMOTION_FALLBACK, EMOTION_UI, type LogView } from "./log-card";
+import { EMOTION_FALLBACK, EMOTION_UI, type LogView } from "./log-card-utils";
 
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 
