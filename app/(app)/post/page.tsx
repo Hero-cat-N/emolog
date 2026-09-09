@@ -8,8 +8,10 @@ import { PageTabs } from "../_components/page-tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 import { postSchema } from "@/lib/validations/post";
@@ -79,54 +81,38 @@ export default function Post() {
           })}
         >
           <div className="grid gap-5">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="today" className="flex items-center gap-2">
-                今日やったこと
-                <Badge className="bg-accent text-accent-foreground">必須</Badge>
-              </Label>
-              <Input {...form.register("today")} id="today" type="text" placeholder="今日やったこと" />
-              {form.formState.errors.today && (
-                <p className="text-sm text-destructive">{form.formState.errors.today.message}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="good" className="flex items-center gap-2">
-                良かったこと
-                <Badge className="bg-accent text-accent-foreground">必須</Badge>
-              </Label>
-              <Input {...form.register("good")} id="good" type="text" placeholder="良かったこと" />
-              {form.formState.errors.good && (
-                <p className="text-sm text-destructive">{form.formState.errors.good.message}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="bad" className="flex items-center gap-2">
-                モヤったこと
-                <Badge variant="secondary">任意</Badge>
-              </Label>
-              <Input {...form.register("bad")} id="bad" type="text" placeholder="なし" />
-              {form.formState.errors.bad && (
-                <p className="text-sm text-destructive">{form.formState.errors.bad.message}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="tomorrow" className="flex items-center gap-2">
-                明日やること
-                <Badge className="bg-accent text-accent-foreground">必須</Badge>
-              </Label>
-              <Input
-                {...form.register("tomorrow")}
-                id="tomorrow"
-                type="text"
-                placeholder="明日やること"
-              />
-              {form.formState.errors.tomorrow && (
-                <p className="text-sm text-destructive">{form.formState.errors.tomorrow.message}</p>
-              )}
-            </div>
+            <Field>
+              <FieldLabel htmlFor="today">
+              今日やったこと
+              <Badge className="bg-accent text-accent-foreground">必須</Badge>
+              </FieldLabel>
+              <Input {...form.register("today")} id="today" type="text" placeholder="今日やったこと" ></Input>
+              <FieldError errors={[form.formState.errors.today]} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="good">
+              良かったこと
+              <Badge className="bg-accent text-accent-foreground">必須</Badge>
+              </FieldLabel>
+              <Input {...form.register("good")} id="good" type="text" placeholder="良かったこと" ></Input>
+              <FieldError errors={[form.formState.errors.good]} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="bad">
+              モヤったこと
+              <Badge variant="secondary" className="text-accent-foreground">任意</Badge>
+              </FieldLabel>
+              <Input {...form.register("bad")} id="bad" type="text" placeholder="なし" ></Input>
+              <FieldError errors={[form.formState.errors.bad]} />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="tomorrow">
+              明日やること
+              <Badge className="bg-accent text-accent-foreground">必須</Badge>
+              </FieldLabel>
+              <Input {...form.register("tomorrow")} id="tomorrow" type="text" placeholder="明日やること" ></Input>
+              <FieldError errors={[form.formState.errors.tomorrow]} />
+            </Field>
           </div>
 
           <Separator className="my-5" />
