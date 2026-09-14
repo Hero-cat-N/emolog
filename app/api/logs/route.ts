@@ -3,8 +3,23 @@ import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { postSchema } from "@/lib/validations/post"
 import { toJsonSafe } from "@/lib/serialize"
+import { createClient } from "@/lib/supabase/server"
+
+// proxy.ts の保護対象から /api は除外しているため、ここで自前にログイン確認する
+async function requireUserId() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  return user?.id ?? null
+}
 
 export async function POST(request: Request) {
+  const userId = await requireUserId()
+  if (!userId) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 })
+  }
+
   const body = await request.json()
   const parsed = postSchema.safeParse(body)
 
@@ -19,6 +34,7 @@ export async function POST(request: Request) {
 
     const log = await prisma.log.create({
       data: {
+        userId,
         didToday: today,
         goodThing: good,
         tomorrowPlan: tomorrow,
@@ -36,8 +52,14 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
+  const userId = await requireUserId()
+  if (!userId) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 })
+  }
+
   try {
     const logs = await prisma.log.findMany({
+      where: { userId },
       orderBy: { createdAt: 'desc' }
     })
 
