@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_ROUTES = ["/login"];
+const PUBLIC_ROUTES = ["/login", "/signup"];
 
 // proxy.ts から呼ぶ。Supabaseのセッションをリフレッシュしつつ、
 // 未ログインで保護ルートに来たら/loginへ、ログイン済みで/loginに来たら/postへ流す

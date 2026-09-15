@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
@@ -116,9 +117,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 </Button>
                 <FieldDescription className="text-center">
                   アカウントをお持ちでない方は{" "}
-                  <a href="#" className="font-medium text-primary">
+                  <Link href="/signup" className="font-medium text-primary">
                     新規登録
-                  </a>
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
