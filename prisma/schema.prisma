@@ -12,6 +12,19 @@ datasource db {
   provider = "postgresql"
 }
 
+// idはSupabaseのauth.users.id(UUID)と同じ値をそのまま使う。emailなどは持たせず、
+// 必要になったらそのとき追加する(Supabase側と二重管理にしない)
+model User {
+  id String @id @db.Uuid
+
+  logs Log[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
 // 感情マスタ。code はアプリのロジック(zodのenumなど)から参照する識別子、
 // label は画面表示用。列構成は仮置きなので実際の設計に合わせて調整する
 model Emotion {
@@ -25,10 +38,11 @@ model Emotion {
 }
 
 model Log {
-  id     BigInt @id @default(autoincrement())
-  // usersテーブルが未実装のため、今はFKを張らずNULL許容の列のみ用意している。
-  // 認証を実装する段階でUserモデル・リレーション追加とNOT NULL化を行う
-  userId BigInt? @map("user_id")
+  id BigInt @id @default(autoincrement())
+  // 既存データにuserId未設定の行が残っている可能性があるため、まだNOT NULLにはしていない。
+  // 空行が無いことを確認できたらNOT NULL化する
+  userId String? @map("user_id") @db.Uuid
+  user   User?   @relation(fields: [userId], references: [id])
 
   emotionId Int?     @map("emotion_id") @db.SmallInt
   emotion   Emotion? @relation(fields: [emotionId], references: [id])
