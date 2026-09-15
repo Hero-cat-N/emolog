@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
+import { LogoutButton } from "@/components/logout-button";
 
 const TABS = [
   { href: "/post", label: "記録する" },
@@ -16,7 +17,7 @@ export function PageTabs() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex border-b text-sm">
+    <nav className="flex items-center border-b text-sm">
       {TABS.map((tab) => {
         const isActive = pathname === tab.href;
 
@@ -47,6 +48,9 @@ export function PageTabs() {
           </Link>
         );
       })}
+      <div className="flex items-center px-2">
+        <LogoutButton />
+      </div>
     </nav>
   );
 }
