@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { LogoutButton } from "@/components/logout-button";
 
 const TABS = [
+  { href: "/", label: "ホーム" },
   { href: "/post", label: "記録する" },
   { href: "/logs", label: "一覧" },
   { href: "/analytics", label: "分析", disabled: true },
