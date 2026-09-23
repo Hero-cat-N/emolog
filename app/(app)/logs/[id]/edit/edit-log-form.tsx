@@ -44,6 +44,7 @@ export function EditLogForm({ log }: { log: EditableLog }) {
         }}
         submitLabel="更新する"
         submittingLabel="更新中…"
+        cancelHref="/logs"
     />
   )
 }

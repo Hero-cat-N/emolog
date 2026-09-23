@@ -28,5 +28,16 @@ export default async function EditLogPage(props: PageProps<"/logs/[id]/edit">) {
     emotionCode: currentLog.emotion?.code ?? null,
   };
 
-  return <EditLogForm log={editableLog} />;
+  return (
+    <div className="flex min-h-screen justify-center bg-background px-4 py-8">
+      <div className="w-full max-w-md overflow-hidden rounded-3xl border bg-card shadow-sm">
+        {/* ヘッダー */}
+        <header className="flex items-center justify-between px-6 pt-6 pb-4">
+          <h2 className="font-heading text-xl font-bold">記録を編集する</h2>
+        </header>
+
+        <EditLogForm log={editableLog} />
+      </div>
+    </div>
+  );
 }

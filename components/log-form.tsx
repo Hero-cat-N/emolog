@@ -11,6 +11,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 import { postSchema, type PostInput } from "@/lib/validations/post";
+import Link from "next/link";
 
 // 気分の選択肢。value は postSchema の z.enum と一致させる（見た目のラベルだけ変更可）
 const MOODS = [
@@ -28,11 +29,14 @@ export function LogForm({
   onSubmit,
   submitLabel,
   submittingLabel,
+  cancelHref,
 }: {
   defaultValues: PostInput;
   onSubmit: (data: PostInput) => Promise<string | void>;
   submitLabel: string;
   submittingLabel: string;
+  // 「一覧に戻る」リンク。渡された画面だけに表示する（/post では渡さないので出ない）
+  cancelHref?: string;
 }) {
   const form = useForm({
     resolver: zodResolver(postSchema),
@@ -40,11 +44,7 @@ export function LogForm({
   });
 
   const values = form.watch();
-  const charCount =
-    (values.today?.length ?? 0) +
-    (values.good?.length ?? 0) +
-    (values.bad?.length ?? 0) +
-    (values.tomorrow?.length ?? 0);
+  const charCount = (values.today?.length ?? 0) + (values.good?.length ?? 0) + (values.bad?.length ?? 0) + (values.tomorrow?.length ?? 0);
 
   return (
     <form
@@ -76,7 +76,9 @@ export function LogForm({
         <Field>
           <FieldLabel htmlFor="bad">
             モヤったこと
-            <Badge variant="secondary" className="text-accent-foreground">任意</Badge>
+            <Badge variant="secondary" className="text-accent-foreground">
+              任意
+            </Badge>
           </FieldLabel>
           <Input {...form.register("bad")} id="bad" type="text" placeholder="なし" />
           <FieldError errors={[form.formState.errors.bad]} />
@@ -99,20 +101,9 @@ export function LogForm({
           control={form.control}
           name="mood"
           render={({ field }) => (
-            <ToggleGroup
-              className="w-full justify-between gap-2"
-              variant="outline"
-              spacing={2}
-              value={[field.value]}
-              onValueChange={(val) => field.onChange(val[0])}
-            >
+            <ToggleGroup className="w-full justify-between gap-2" variant="outline" spacing={2} value={[field.value]} onValueChange={(val) => field.onChange(val[0])}>
               {MOODS.map((mood) => (
-                <ToggleGroupItem
-                  key={mood.value}
-                  value={mood.value}
-                  aria-label={mood.label}
-                  className="flex h-auto flex-1 flex-col gap-1 rounded-xl py-3 aria-pressed:border-primary aria-pressed:bg-accent aria-pressed:text-accent-foreground"
-                >
+                <ToggleGroupItem key={mood.value} value={mood.value} aria-label={mood.label} className="flex h-auto flex-1 flex-col gap-1 rounded-xl py-3 aria-pressed:border-primary aria-pressed:bg-accent aria-pressed:text-accent-foreground">
                   <span className="text-2xl">{mood.emoji}</span>
                   <span className="text-xs">{mood.label}</span>
                 </ToggleGroupItem>
@@ -124,17 +115,16 @@ export function LogForm({
 
       <Separator className="my-5" />
 
-      {form.formState.errors.root?.message && (
-        <p className="mb-3 text-sm text-destructive">{form.formState.errors.root.message}</p>
-      )}
+      {form.formState.errors.root?.message && <p className="mb-3 text-sm text-destructive">{form.formState.errors.root.message}</p>}
 
       <div className="flex items-center justify-between">
+        {cancelHref && (
+          <Link href={cancelHref} className="flex justify-center items-center rounded-xl border border-border bg-card px-4 w-32 h-12 shadow-sm transition-colors hover:bg-muted">
+            一覧に戻る
+          </Link>
+        )}
         <span className="text-sm text-muted-foreground">{charCount}文字</span>
-        <Button
-          type="submit"
-          className="h-12 rounded-xl px-8 text-base"
-          disabled={form.formState.isSubmitting}
-        >
+        <Button type="submit" className="h-12 rounded-xl px-8 text-base" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? submittingLabel : submitLabel}
         </Button>
       </div>
