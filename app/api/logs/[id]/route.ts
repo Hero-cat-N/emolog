@@ -5,20 +5,6 @@ import { postSchema } from "@/lib/validations/post"
 import { toJsonSafe } from "@/lib/serialize";
 import { createClient } from "@/lib/supabase/server";
 
-// TODO(human): PATCH ハンドラ（更新用）
-// app/api/logs/route.ts の POST とほぼ同じ形。違いは create ではなく update ということ。
-// 1. request.json() でbodyを受け取り、postSchema.safeParse で検証する（POSTと同じ）
-// 2. mood(code) から Emotion を検索する（POSTと同じ: prisma.emotion.findUnique）
-// 3. prisma.log.update({ where: { id: BigInt(id) }, data: { ... } }) で更新する
-//    didToday/goodThing/badThing/tomorrowPlan/emotionId を更新すること。
-//    loggedDate（記録日）はこの画面のUIに存在しないので、更新データに含めず元の値のまま残すこと
-// 4. 成功したら toJsonSafe(log) を 200 で返す。失敗したら 500
-//
-// 判断が分かれるところ: POST は requireUserId() でログイン確認していますが、
-// 今の DELETE ハンドラ（このファイルの下）には無く、統一されていません。
-// PATCH にも requireUserId() を入れるかどうかは、あなたの判断でOKです
-// （このアプリは個人利用前提なので今は無くても動きますが、入れておくと安全です）
-
 async function requireUserId() {
   const supabase = await createClient()
   const {
@@ -43,12 +29,9 @@ export async function PATCH(request: Request, context: RouteContext<"/api/logs/[
   const { today, good, tomorrow, bad, mood } = parsed.data;
   const { id } = await context.params;
   try {
-    // 2. mood(code) から Emotion を検索する（POSTと同じ: prisma.emotion.findUnique）
     const emotion = await prisma.emotion.findUnique({ where: { code: mood } });
 
-    // 3. prisma.log.update({ where: { id: BigInt(id) }, data: { ... } }) で更新する
-    //    didToday/goodThing/badThing/tomorrowPlan/emotionId を更新すること。
-    //    loggedDate（記録日）はこの画面のUIに存在しないので、更新データに含めず元の値のまま残すこと
+    // loggedDate（記録日）はこの画面のUIに存在しないので、更新データに含めず元の値のまま残す
     const log = await prisma.log.update({
       where: { id: BigInt(id) },
       data: {
