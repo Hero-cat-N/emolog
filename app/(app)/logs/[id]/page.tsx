@@ -3,24 +3,17 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, ChevronRight, Ellipsis, SquarePen } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { LogCard, LogCardPanel } from "../log-card";
 import {
   EMOTION_FALLBACK,
   EMOTION_UI,
   formatLoggedDate,
+  parseId,
   type LogView,
 } from "../log-card-utils";
 
 export const dynamic = "force-dynamic";
-
-function parseId(id: string): bigint {
-  try {
-    return BigInt(id);
-  } catch {
-    notFound();
-  }
-}
 
 export default async function LogDetailPage(props: PageProps<"/logs/[id]">) {
   const { id } = await props.params;
@@ -67,9 +60,13 @@ export default async function LogDetailPage(props: PageProps<"/logs/[id]">) {
           <p className="mt-1 text-xs text-muted-foreground">{weekday}</p>
         </div>
         <div className="flex items-center gap-1 text-[#6E5847]">
-          <Button variant="ghost" size="icon-sm" aria-label="編集" disabled>
+          <Link
+            href={`/logs/${current.id}/edit`}
+            aria-label="編集"
+            className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
+          >
             <SquarePen />
-          </Button>
+          </Link>
           <Button variant="ghost" size="icon-sm" aria-label="メニュー" disabled>
             <Ellipsis />
           </Button>
