@@ -53,7 +53,11 @@ export function LogForm({
         const errorMessage = await onSubmit(data);
         if (errorMessage) {
           form.setError("root", { message: errorMessage });
+          return;
         }
+        // 成功時は呼び出し側がpushで画面遷移することもあるが、
+        // そのままこの画面に留まるケース(/postでの通常投稿)もあるのでここでリセットしておく
+        form.reset();
       })}
     >
       <div className="grid gap-5">
