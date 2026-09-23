@@ -2,6 +2,18 @@
 // log-card.tsx は "use client" なので、そこに置いた関数は Server Component から呼べない。
 // Server Component（例: logs/[id]/page.tsx）でも使うものはここに置く。
 
+import { notFound } from "next/navigation";
+
+// URLの id 部分（文字列）を BigInt に変換する。失敗したら 404 扱い。
+// logs/[id]/page.tsx と logs/[id]/edit/page.tsx の両方が使うのでここに集約
+export function parseId(id: string): bigint {
+  try {
+    return BigInt(id);
+  } catch {
+    notFound();
+  }
+}
+
 // サーバ(page.tsx)からクライアントに渡すログ1件の形。
 // Prisma の Log をそのまま渡すと BigInt が混ざって渡せないので、必要な項目だけの素のオブジェクトにする
 export type LogView = {
