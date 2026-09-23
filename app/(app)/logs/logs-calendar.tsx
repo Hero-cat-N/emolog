@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, SquarePen } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { EMOTION_FALLBACK, EMOTION_UI, type LogView } from "./log-card-utils";
 
@@ -82,6 +83,8 @@ export function LogsCalendar({ logs }: { logs: LogView[] }) {
   const selectedKey = cellKey(selected);
   const selectedLogs = logsByDay.get(selectedKey) ?? [];
   const selHeading = `${selected.getMonth() + 1}/${selected.getDate()}（${WEEKDAYS[selected.getDay()]}）のログ`;
+  // selected はローカルの暦日から作った Date なので、URLに渡す文字列もローカルの getter で組み立てる
+  const selectedDateParam = `${selected.getFullYear()}-${String(selected.getMonth() + 1).padStart(2, "0")}-${String(selected.getDate()).padStart(2, "0")}`;
 
   const shiftMonth = (delta: number) =>
     setVisible((v) => {
@@ -210,7 +213,12 @@ export function LogsCalendar({ logs }: { logs: LogView[] }) {
       {/* 選択した日のログ */}
       <h2 className="mb-3 px-1 font-heading text-base font-bold">{selHeading}</h2>
       {selectedLogs.length === 0 ? (
-        <p className="px-1 text-sm text-muted-foreground">この日の記録はありません。</p>
+        <Link
+          href={`/post?date=${selectedDateParam}`}
+          className="flex items-center justify-between rounded-2xl border border-dashed border-border px-4 py-4 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          この日の記録を追加する
+        </Link>
       ) : (
         <div className="flex flex-col gap-3">
           {selectedLogs.map((log) => (
@@ -228,20 +236,27 @@ function DayLogCard({ log }: { log: LogView }) {
   const label = `${date.getUTCMonth() + 1}/${date.getUTCDate()}（${WEEKDAYS[date.getUTCDay()]}）`;
 
   return (
-    <Link
-      href={`/logs/${log.id}`}
-      className="block rounded-2xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-muted"
-    >
-      <div className="flex items-start justify-between">
-        <p className="text-xs text-accent-foreground">{label}</p>
-        <span className="text-xl leading-none">{emotion.emoji}</span>
-      </div>
-      <p className="mt-2 text-sm leading-relaxed text-foreground">{log.didToday}</p>
-      {/* タグ（プレースホルダー：タグ機能は未実装。見た目確認用の固定値） */}
-      <div className="mt-3 flex flex-wrap gap-2">
-        <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs text-accent-foreground">FF14</span>
-        <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs text-accent-foreground">零式</span>
-      </div>
-    </Link>
+    <div className="flex items-start gap-2 rounded-2xl border border-border bg-card p-4 shadow-sm">
+      {/* 詳細への遷移。編集アイコンとは別のリンクなので兄弟要素として並べる（Linkの中にLinkは置けない） */}
+      <Link href={`/logs/${log.id}`} className="min-w-0 flex-1 transition-colors hover:opacity-80">
+        <div className="flex items-start justify-between">
+          <p className="text-xs text-accent-foreground">{label}</p>
+          <span className="text-xl leading-none">{emotion.emoji}</span>
+        </div>
+        <p className="mt-2 text-sm leading-relaxed text-foreground">{log.didToday}</p>
+        {/* タグ（プレースホルダー：タグ機能は未実装。見た目確認用の固定値） */}
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs text-accent-foreground">FF14</span>
+          <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs text-accent-foreground">零式</span>
+        </div>
+      </Link>
+      <Link
+        href={`/logs/${log.id}/edit`}
+        aria-label="編集"
+        className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
+      >
+        <SquarePen />
+      </Link>
+    </div>
   );
 }
