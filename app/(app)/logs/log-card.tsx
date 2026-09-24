@@ -56,8 +56,8 @@ export function LogCard({ log, hideHeader = false }: { log: LogView; hideHeader?
       <div
         className={`flex items-center gap-3 px-5 py-4 ${hideHeader ? "" : "border-t border-border"}`}
       >
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-full text-xl" style={{ backgroundColor: emotion.tint }}>
-          {emotion.emoji}
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: emotion.tint }}>
+          <emotion.icon className="size-5 text-foreground" />
         </span>
         <div>
           <p className="font-heading text-base font-bold text-foreground">{log.emotionLabel ?? "未設定"}</p>

@@ -85,7 +85,7 @@ export default async function DashboardPage() {
               <p className="mt-1 text-xs text-muted-foreground">今月の記録</p>
             </div>
             <div className="flex flex-col items-center justify-center rounded-2xl bg-muted px-3 py-4">
-              <span className="text-2xl">{recentEmotion.emoji}</span>
+              <recentEmotion.icon className="size-6 text-foreground" />
               <p className="mt-1 text-xs text-muted-foreground">直近の気分</p>
             </div>
           </div>

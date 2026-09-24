@@ -241,7 +241,7 @@ function DayLogCard({ log }: { log: LogView }) {
       <Link href={`/logs/${log.id}`} className="min-w-0 flex-1 transition-colors hover:opacity-80">
         <div className="flex items-start justify-between">
           <p className="text-xs text-accent-foreground">{label}</p>
-          <span className="text-xl leading-none">{emotion.emoji}</span>
+          <emotion.icon className="size-4 text-muted-foreground" />
         </div>
         <p className="mt-2 text-sm leading-relaxed text-foreground">{log.didToday}</p>
         {/* タグ（プレースホルダー：タグ機能は未実装。見た目確認用の固定値） */}

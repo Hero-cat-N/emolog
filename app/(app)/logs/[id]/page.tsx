@@ -116,8 +116,8 @@ function NeighborLink({ side, log }: { side: "older" | "newer"; log: LogView | n
         <span className="block text-xs text-muted-foreground">
           {formatLoggedDate(log.loggedDate).short}
         </span>
-        <span className="block truncate text-sm text-foreground">
-          {emotion.emoji} {log.emotionLabel ?? "未設定"}
+        <span className="flex items-center gap-1 truncate text-sm text-foreground">
+          <emotion.icon className="size-3.5 shrink-0" /> {log.emotionLabel ?? "未設定"}
         </span>
       </span>
     </Link>

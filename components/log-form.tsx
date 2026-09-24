@@ -12,13 +12,14 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 import { postSchema, type PostInput } from "@/lib/validations/post";
 import Link from "next/link";
+import { Angry, Frown, Laugh, Meh } from "lucide-react";
 
 // 気分の選択肢。value は postSchema の z.enum と一致させる（見た目のラベルだけ変更可）
 const MOODS = [
-  { value: "fun", emoji: "😄", label: "楽しい" },
-  { value: "normal", emoji: "😐", label: "普通" },
-  { value: "sad", emoji: "😞", label: "悲しい" },
-  { value: "frustrate", emoji: "😤", label: "イライラ" },
+  { value: "fun", icon: Laugh, label: "楽しい" },
+  { value: "normal", icon: Meh, label: "普通" },
+  { value: "sad", icon: Frown, label: "悲しい" },
+  { value: "frustrate", icon: Angry, label: "イライラ" },
 ] as const;
 
 // 新規投稿(/post)と編集(/logs/[id]/edit)の両方で使う本文フォーム。
@@ -108,7 +109,7 @@ export function LogForm({
             <ToggleGroup className="w-full justify-between gap-2" variant="outline" spacing={2} value={[field.value]} onValueChange={(val) => field.onChange(val[0])}>
               {MOODS.map((mood) => (
                 <ToggleGroupItem key={mood.value} value={mood.value} aria-label={mood.label} className="flex h-auto flex-1 flex-col gap-1 rounded-xl py-3 aria-pressed:border-primary aria-pressed:bg-accent aria-pressed:text-accent-foreground">
-                  <span className="text-2xl">{mood.emoji}</span>
+                  <mood.icon className="size-6" />
                   <span className="text-xs">{mood.label}</span>
                 </ToggleGroupItem>
               ))}
