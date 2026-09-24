@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils";
 import { LogoutButton } from "@/components/logout-button";
 import { NAV_TABS } from "./nav-tabs";
 
-export function PageTabs() {
-  // 今表示している URL のパス（例: "/logs"）。ページ遷移するたびに新しい値になる
+// PC幅(lg以上)だけで出す縦のサイドナビ。中身(NAV_TABS)はPageTabsと共通
+export function SidebarNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center border-b text-sm">
+    <nav className="hidden h-fit w-56 shrink-0 flex-col gap-1 rounded-3xl border bg-card p-3 shadow-sm lg:flex">
       {NAV_TABS.map((tab) => {
         const isActive = pathname === tab.href;
 
@@ -20,7 +20,7 @@ export function PageTabs() {
           return (
             <span
               key={tab.href}
-              className="flex-1 px-4 py-3 text-center text-muted-foreground/50"
+              className="rounded-xl px-4 py-2.5 text-sm text-muted-foreground/50"
             >
               {tab.label}
             </span>
@@ -33,17 +33,17 @@ export function PageTabs() {
             href={tab.href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "flex-1 px-4 py-3 text-center transition-colors",
+              "rounded-xl px-4 py-2.5 text-sm transition-colors",
               isActive
-                ? "border-b-2 border-primary font-medium text-primary"
-                : "text-muted-foreground hover:text-foreground",
+                ? "bg-accent font-medium text-accent-foreground"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
           >
             {tab.label}
           </Link>
         );
       })}
-      <div className="flex items-center px-2">
+      <div className="mt-2 border-t border-border pt-2">
         <LogoutButton />
       </div>
     </nav>

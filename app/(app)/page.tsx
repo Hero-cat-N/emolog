@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { startOfUTCDay } from "@/lib/date";
 import { PageTabs } from "./_components/page-tabs";
+import { SidebarNav } from "./_components/sidebar-nav";
 import { EMOTION_FALLBACK, EMOTION_UI } from "./logs/log-card-utils";
 import { calculateStreak } from "./streak";
 
@@ -59,14 +60,21 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex min-h-screen justify-center bg-background px-4 py-8">
-      <div className="w-full max-w-md overflow-hidden rounded-3xl border bg-card shadow-sm">
-        <header className="px-6 pt-6 pb-4">
-          <p className="text-sm text-muted-foreground">こんにちは</p>
-        </header>
+      {/* lg未満: 縦積みの1カラム。lg以上: 左にサイドバー、右に幅広メインカード */}
+      <div className="w-full max-w-md lg:flex lg:max-w-5xl lg:items-start lg:gap-6">
+        <SidebarNav />
 
-        <PageTabs />
+        <div className="flex-1 overflow-hidden rounded-3xl border bg-card shadow-sm">
+          <header className="px-6 pt-6 pb-4">
+            <p className="text-sm text-muted-foreground">こんにちは</p>
+          </header>
 
-        <div className="flex flex-col gap-4 px-6 py-5">
+          {/* サイドバーが出てるlg以上では横タブは不要 */}
+          <div className="lg:hidden">
+            <PageTabs />
+          </div>
+
+          <div className="flex flex-col gap-4 px-6 py-5">
           {/* 連続記録 / 今月の記録 / 直近の気分 */}
           <div className="grid grid-cols-3 gap-2">
             <div className="rounded-2xl bg-primary px-3 py-4 text-primary-foreground">
@@ -163,6 +171,7 @@ export default async function DashboardPage() {
               </span>
             </div>
           </section>
+          </div>
         </div>
       </div>
     </div>
