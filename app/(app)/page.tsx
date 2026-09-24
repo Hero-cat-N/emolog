@@ -137,7 +137,9 @@ export default async function DashboardPage() {
           {/* 今日の記録CTA */}
           <Link
             href={todayLog ? `/logs/${todayLog.id}` : "/post"}
-            className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-4 shadow-sm transition-colors hover:bg-muted"
+            className={`flex items-center justify-between rounded-2xl border px-4 py-4 shadow-sm transition-colors hover:bg-muted ${
+              todayLog ? "border-border bg-card" : "animate-glow border-primary bg-card"
+            }`}
           >
             <div>
               <p className="font-bold text-foreground">

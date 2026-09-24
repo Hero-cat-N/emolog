@@ -159,13 +159,32 @@
   }
 }
 
+/* 今日の記録CTA（未記録時）の発光。プライマリカラーの輪を外側に広げて消す */
+@keyframes cta-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary), transparent 55%);
+  }
+  50% {
+    box-shadow: 0 0 0 10px color-mix(in oklch, var(--primary), transparent 90%);
+  }
+}
+
 @layer utilities {
   .animate-page-enter {
     animation: app-page-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
+  .animate-glow {
+    animation: cta-glow 2s ease-in-out infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .animate-page-enter {
+      animation: none;
+    }
+
+    .animate-glow {
       animation: none;
     }
   }
