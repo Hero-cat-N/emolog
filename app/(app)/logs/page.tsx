@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
-import { PageTabs } from "../_components/page-tabs";
+import { AppShell } from "../_components/app-shell";
 import { LogsCalendar } from "./logs-calendar";
 
 export const dynamic = "force-dynamic";
@@ -27,8 +27,8 @@ export default async function LogsPage() {
   }));
 
   return (
-    <div className="flex min-h-screen justify-center bg-background px-4 py-8">
-      <div className="w-full max-w-md overflow-hidden rounded-3xl border bg-card shadow-sm">
+    <AppShell
+      header={
         <div className="flex items-center justify-between px-6 pt-6 pb-4">
           <h1 className="font-heading text-xl font-bold text-foreground">ログ一覧</h1>
           {/* 検索（形だけ・未実装） */}
@@ -42,13 +42,11 @@ export default async function LogsPage() {
             <Search />
           </Button>
         </div>
-
-        <PageTabs />
-
-        <div className="px-6 py-5">
-          <LogsCalendar logs={views} />
-        </div>
+      }
+    >
+      <div className="px-6 py-5">
+        <LogsCalendar logs={views} />
       </div>
-    </div>
+    </AppShell>
   );
 }

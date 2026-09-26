@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { PageTabs } from "../_components/page-tabs";
+import { AppShell } from "../_components/app-shell";
 import { LogForm } from "@/components/log-form";
 import type { PostInput } from "@/lib/validations/post";
 
@@ -54,9 +54,8 @@ function PostForm() {
     : "";
 
   return (
-    <div className="flex min-h-screen justify-center bg-background px-4 py-8">
-      <div className="w-full max-w-md overflow-hidden rounded-3xl border bg-card shadow-sm">
-        {/* ヘッダー */}
+    <AppShell
+      header={
         <header className="flex items-center justify-between px-6 pt-6 pb-4">
           <h2 className="font-heading text-xl font-bold">
             {isBackfill ? "記録を追加" : "今日の記録"}
@@ -65,35 +64,33 @@ function PostForm() {
             {isBackfill ? backfillLabel : dateLabel}
           </span>
         </header>
+      }
+    >
+      <LogForm
+        defaultValues={{ today: "", good: "", tomorrow: "", bad: "", mood: "normal" }}
+        submitLabel="保存する"
+        submittingLabel="保存中…"
+        cancelHref={isBackfill ? "/logs" : undefined}
+        onSubmit={async (data: PostInput) => {
+          const res = await fetch("/api/logs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...data,
+              loggedDate: targetDate ? targetDate.toISOString() : undefined,
+            }),
+          });
 
-        <PageTabs />
+          if (!res.ok) {
+            const body = await res.json().catch(() => null);
+            return typeof body?.error === "string" ? body.error : "保存に失敗しました";
+          }
 
-        <LogForm
-          defaultValues={{ today: "", good: "", tomorrow: "", bad: "", mood: "normal" }}
-          submitLabel="保存する"
-          submittingLabel="保存中…"
-          cancelHref={isBackfill ? "/logs" : undefined}
-          onSubmit={async (data: PostInput) => {
-            const res = await fetch("/api/logs", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                ...data,
-                loggedDate: targetDate ? targetDate.toISOString() : undefined,
-              }),
-            });
-
-            if (!res.ok) {
-              const body = await res.json().catch(() => null);
-              return typeof body?.error === "string" ? body.error : "保存に失敗しました";
-            }
-
-            if (isBackfill) {
-              router.push("/logs");
-            }
-          }}
-        />
-      </div>
-    </div>
+          if (isBackfill) {
+            router.push("/logs");
+          }
+        }}
+      />
+    </AppShell>
   );
 }
