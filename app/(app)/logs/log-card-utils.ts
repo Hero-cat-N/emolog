@@ -31,15 +31,16 @@ export type LogView = {
 // 感情コードごとの表示設定。
 // icon はlucideの線画アイコン（他のUI部品と統一するため絵文字から変更）。
 // tint はカード上部の感情バッジ用の背景色。ベタ塗りせず感情色のティントにする（design.md 7節）。
-export const EMOTION_UI: Record<string, { icon: LucideIcon; tint: string }> = {
-  fun: { icon: Laugh, tint: "#E3F3EA" },
-  normal: { icon: Meh, tint: "#EFEBE4" },
-  sad: { icon: Frown, tint: "#E6ECF7" },
-  frustrate: { icon: Angry, tint: "#FBEEE7" },
+// color は感情そのものの色（globals.css の --emotion-*）。分析画面のバー等で使う。
+export const EMOTION_UI: Record<string, { icon: LucideIcon; tint: string; color: string }> = {
+  fun: { icon: Laugh, tint: "#E3F3EA", color: "var(--emotion-happy)" },
+  normal: { icon: Meh, tint: "#EFEBE4", color: "var(--emotion-neutral)" },
+  sad: { icon: Frown, tint: "#E6ECF7", color: "var(--emotion-sad)" },
+  frustrate: { icon: Angry, tint: "#FBEEE7", color: "var(--emotion-angry)" },
   // lucideに「疲れ」にぴったりの表情アイコンが無いため、一旦 Meh を流用
-  tired: { icon: Meh, tint: "#EEEAF6" },
+  tired: { icon: Meh, tint: "#EEEAF6", color: "var(--emotion-tired)" },
 };
-export const EMOTION_FALLBACK = { icon: Meh, tint: "#EFEBE4" };
+export const EMOTION_FALLBACK = { icon: Meh, tint: "#EFEBE4", color: "var(--emotion-neutral)" };
 
 const WEEKDAY = ["日", "月", "火", "水", "木", "金", "土"];
 
