@@ -17,6 +17,26 @@ export type EmotionCount = {
 // ログの配列を「感情ごとの件数」にまとめ、件数の多い順に並べて返す。
 // 例: [{fun}, {sad}, {fun}] → [{ code: "fun", label: "楽しい", count: 2 }, { code: "sad", ... count: 1 }]
 export function countByEmotion(entries: EmotionEntry[]): EmotionCount[] {
-  // TODO(human): entries を感情コードごとに数えて、件数の多い順の EmotionCount[] を返す
-  return [];
+  // 空の棚を作る
+  const map = new Map<string, EmotionCount>(); // これで中身が空のmapオブジェクトを作成できる
+
+  // 1件ずつ見る
+for (const entry of entries) {
+  //   感情なしなら飛ばす
+  if(entry.emotionCode === null ) continue;
+  
+  //   引き出しを開ける
+  const existing = map.get(entry.emotionCode);
+  
+  //   あれば +1、なければ新しく作る（count: 1）
+  if (existing) {
+    existing.count++;
+  } else {
+    map.set(entry.emotionCode, {code:entry.emotionCode, label:entry.emotionLabel ?? entry.emotionCode, count: 1});
+  }
 }
+// 中身を配列にして、多い順に並べて返す
+  return [...map.values()].sort((a, b) => b.count - a.count);
+}
+
+
