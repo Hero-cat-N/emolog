@@ -63,11 +63,19 @@ export function LogDetailBody({
       <div className="lg:col-start-1 lg:row-start-1 lg:border-r lg:border-line">
         <EmotionBanner log={log} />
 
-        {/* タグ（プレースホルダー：タグ機能は未実装） */}
+        {/* タグ。「＋タグを追加」は編集画面のタグ欄へ */}
         <div className="flex flex-wrap gap-1.75 border-b border-line px-5 py-3.25 lg:px-7">
-          <span className="rounded-full border border-dashed border-[#D8CDBD] bg-card px-3 py-1 text-xs text-muted-foreground">
+          {log.tags.map((name) => (
+            <span key={name} className="rounded-full bg-muted px-3 py-1 text-xs text-ink-soft">
+              {name}
+            </span>
+          ))}
+          <Link
+            href={`/logs/${log.id}/edit`}
+            className="rounded-full border border-dashed border-[#D8CDBD] bg-card px-3 py-1 text-xs text-muted-foreground transition-colors duration-150 hover:bg-accent"
+          >
             ＋タグを追加
-          </span>
+          </Link>
         </div>
 
         {/* 本文4項目 */}

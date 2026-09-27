@@ -322,11 +322,15 @@ function DayLogCard({ log, isOpen }: { log: LogView; isOpen: boolean }) {
         </span>
       </div>
       <p className="text-[13px] leading-relaxed text-foreground">{log.didToday}</p>
-      {/* タグ（プレースホルダー：タグ機能は未実装。見た目確認用の固定値） */}
-      <div className="mt-2 flex gap-1.5">
-        <span className="rounded-full bg-accent px-2.5 py-0.5 text-[11px] text-accent-foreground">FF14</span>
-        <span className="rounded-full bg-accent px-2.5 py-0.5 text-[11px] text-accent-foreground">零式</span>
-      </div>
+      {log.tags.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {log.tags.map((name) => (
+            <span key={name} className="rounded-full bg-accent px-2.5 py-0.5 text-[11px] text-accent-foreground">
+              {name}
+            </span>
+          ))}
+        </div>
+      )}
     </Link>
   );
 }

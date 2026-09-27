@@ -17,7 +17,8 @@ export default async function LogDetailPage(props: PageProps<"/logs/[id]">) {
   // 一覧ペインと前後の日への移動用に全件を取る（件数が少ない個人アプリ想定）
   const logs = await prisma.log.findMany({
     orderBy: [{ loggedDate: "asc" }, { id: "asc" }],
-    include: { emotion: true },
+    // タグは中間テーブル(log_tags)越しなので、その先の tag まで include する
+    include: { emotion: true, tags: { include: { tag: true } } },
   });
 
   const views: LogView[] = logs.map((log) => ({
@@ -29,6 +30,7 @@ export default async function LogDetailPage(props: PageProps<"/logs/[id]">) {
     goodThing: log.goodThing,
     badThing: log.badThing,
     tomorrowPlan: log.tomorrowPlan,
+    tags: log.tags.map((logTag) => logTag.tag.name),
   }));
 
   const current = views.find((log) => log.id === currentId.toString());

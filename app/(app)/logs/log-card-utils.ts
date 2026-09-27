@@ -26,6 +26,7 @@ export type LogView = {
   goodThing: string;
   badThing: string | null;
   tomorrowPlan: string;
+  tags: string[];
 };
 
 // 感情コードごとの表示設定。
