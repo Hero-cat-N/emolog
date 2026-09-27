@@ -4,11 +4,12 @@ import { Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { startOfUTCDay } from "@/lib/date";
-import { AppShell } from "../_components/app-shell";
+import { AppShell, PageHeading, SectionLabel } from "../_components/app-shell";
 import { EMOTION_FALLBACK, EMOTION_UI } from "../logs/log-card-utils";
 import { calculateStreak } from "../streak";
 import { countByEmotion } from "./count-by-emotion";
 import { EmotionBreakdown } from "./emotion-breakdown";
+import { ComingSoon } from "./panel";
 import { parsePeriod } from "./period";
 import { PeriodTabs } from "./period-tabs";
 
@@ -62,51 +63,82 @@ export default async function AnalyticsPage({ // awaitを案つよ
   const topEmotion = counts[0];
   const topEmotionUI = (topEmotion && EMOTION_UI[topEmotion.code]) || EMOTION_FALLBACK;
 
+  // 上段のメトリクス1枚ぶんの見た目（記録日数 / 多い感情 / 連続記録）
+  const metricCard =
+    "flex flex-col items-center justify-center rounded-[11px] border bg-card p-2.5 text-center lg:rounded-[14px] lg:p-4.5";
+  const metricValue =
+    "font-heading text-[19px] leading-tight font-bold text-foreground lg:text-[28px] lg:leading-[1.15] lg:font-extrabold";
+  const metricLabel = "mt-0.5 text-[10px] text-muted-foreground lg:mt-1 lg:text-[11.5px]";
+
   return (
     <AppShell
       header={
-        <header className="px-6 pt-6 pb-4">
-          <h1 className="font-heading text-xl font-bold text-foreground">感情ログ</h1>
-          <p className="mt-1 text-xs text-muted-foreground">直近{periodDays}日間</p>
-        </header>
+        <div className="flex items-center justify-between">
+          <PageHeading>感情ログ</PageHeading>
+          <span className="text-[11.5px] text-muted-foreground lg:text-[12.5px]">直近{periodDays}日間</span>
+        </div>
       }
     >
-      <div className="flex flex-col gap-5 px-6 py-5">
-        <PeriodTabs current={periodDays} />
+      <div className="flex flex-col gap-4 px-5 py-4 lg:gap-5.5 lg:px-8 lg:py-6">
+        <PeriodTabs current={periodDays} basePath="/analytics" />
 
         {/* 記録日数 / 多い感情 / 連続記録 */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="flex flex-col items-center justify-center rounded-2xl bg-muted px-3 py-4">
-            <p className="font-accent text-2xl font-bold text-foreground">{periodLogs.length}</p>
-            <p className="mt-1 text-xs text-muted-foreground">記録日数</p>
+        <div className="grid grid-cols-3 gap-2 lg:gap-3.5">
+          <div className={metricCard}>
+            <p className={metricValue}>{periodLogs.length}</p>
+            <p className={metricLabel}>記録日数</p>
           </div>
-          <div className="flex flex-col items-center justify-center rounded-2xl bg-muted px-3 py-4">
+          <div className={metricCard}>
             {topEmotion ? (
-              <topEmotionUI.icon className="size-6" style={{ color: topEmotionUI.color }} />
+              <topEmotionUI.icon className="size-6 lg:size-8" style={{ color: topEmotionUI.color }} />
             ) : (
-              <span className="text-2xl text-muted-foreground">—</span>
+              <span className={metricValue}>—</span>
             )}
-            <p className="mt-1 text-xs text-muted-foreground">多い感情</p>
+            <p className={metricLabel}>多い感情</p>
           </div>
-          <div className="flex flex-col items-center justify-center rounded-2xl bg-muted px-3 py-4">
-            <p className="font-accent text-2xl font-bold text-foreground">{streak}</p>
-            <p className="mt-1 text-xs text-muted-foreground">連続記録</p>
+          <div className={metricCard}>
+            <p className={metricValue}>{streak}</p>
+            <p className={metricLabel}>連続記録</p>
           </div>
         </div>
 
-        <section>
-          <h2 className="mb-3 text-sm font-bold text-foreground">感情の内訳</h2>
-          <EmotionBreakdown counts={counts} />
-        </section>
+        {/* SP: 縦積み。lg: 左に推移・内訳、右カラム（固定幅）にコンテンツ・インサイト */}
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start lg:gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="flex min-w-0 flex-col gap-4 lg:gap-5.5">
+            <section>
+              <SectionLabel>感情スコアの推移</SectionLabel>
+              {/* 推移グラフは未実装（Recharts で実装予定） */}
+              <ComingSoon className="h-26 bg-card lg:h-55" />
+            </section>
 
-        {/* AIインサイト（プレースホルダー：未実装） */}
-        <section className="rounded-2xl border border-dashed border-border px-4 py-4">
-          <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
-            <Sparkles className="size-4 text-primary" />
-            AIインサイト
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">準備中です</p>
-        </section>
+            <section>
+              <SectionLabel>感情の内訳</SectionLabel>
+              <EmotionBreakdown counts={counts} />
+            </section>
+          </div>
+
+          <div className="h-px bg-border lg:hidden" />
+
+          <div className="flex flex-col gap-4 lg:gap-5.5">
+            <section>
+              <SectionLabel>よく遊んだコンテンツ</SectionLabel>
+              {/* タグ機能の実装待ち */}
+              <ComingSoon className="h-12 bg-card" />
+            </section>
+
+            {/* AIインサイト（プレースホルダー：未実装）。AI由来は ✨ + accent 配色 */}
+            <section>
+              <SectionLabel>インサイト（AI）</SectionLabel>
+              <div className="flex gap-2.25 rounded-[11px] border border-accent-border bg-accent p-2.75 lg:rounded-[14px] lg:p-4">
+                <Sparkles className="mt-0.5 size-4 shrink-0 text-accent-foreground" strokeWidth={1.8} />
+                <div>
+                  <p className="text-[12.5px] leading-normal text-foreground lg:text-[13.5px]">準備中です</p>
+                  <p className="mt-0.75 text-[10px] text-muted-foreground">✨ AI が期間の傾向をまとめます</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
       </div>
     </AppShell>
   );
