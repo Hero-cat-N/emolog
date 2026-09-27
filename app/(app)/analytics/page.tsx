@@ -12,6 +12,8 @@ import { EmotionBreakdown } from "./emotion-breakdown";
 import { ComingSoon } from "./panel";
 import { parsePeriod } from "./period";
 import { PeriodTabs } from "./period-tabs";
+import { toScoreSeries } from "./score-series";
+import { ScoreTrendChart } from "./score-trend-chart";
 
 export const dynamic = "force-dynamic";
 
@@ -38,10 +40,11 @@ export default async function AnalyticsPage({ // awaitを案つよ
   periodStart.setUTCDate(periodStart.getUTCDate() - (periodDays - 1));
 
   const [periodLogs, allDates] = await Promise.all([
-    // 期間内のログ（感情の内訳と記録日数に使う）
+    // 期間内のログ（感情の内訳・記録日数・スコア推移に使う）。推移グラフのため古い順に並べる
     prisma.log.findMany({
       where: { userId, loggedDate: { gte: periodStart } },
-      select: { emotion: { select: { code: true, label: true } } },
+      select: { loggedDate: true, emotion: { select: { code: true, label: true } } },
+      orderBy: { loggedDate: "asc" },
     }),
     // 連続記録は期間に関係なく「今日から遡って」数えるので全件の日付が要る
     prisma.log.findMany({
@@ -53,6 +56,13 @@ export default async function AnalyticsPage({ // awaitを案つよ
 
   const counts = countByEmotion(
     periodLogs.map((log) => ({
+      emotionCode: log.emotion?.code ?? null,
+      emotionLabel: log.emotion?.label ?? null,
+    })),
+  );
+  const scorePoints = toScoreSeries(
+    periodLogs.map((log) => ({
+      loggedDate: log.loggedDate,
       emotionCode: log.emotion?.code ?? null,
       emotionLabel: log.emotion?.label ?? null,
     })),
@@ -107,8 +117,7 @@ export default async function AnalyticsPage({ // awaitを案つよ
           <div className="flex min-w-0 flex-col gap-4 lg:gap-5.5">
             <section>
               <SectionLabel>感情スコアの推移</SectionLabel>
-              {/* 推移グラフは未実装（Recharts で実装予定） */}
-              <ComingSoon className="h-26 bg-card lg:h-55" />
+              <ScoreTrendChart points={scorePoints} />
             </section>
 
             <section>
