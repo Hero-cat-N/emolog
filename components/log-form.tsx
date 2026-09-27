@@ -16,6 +16,7 @@ import { Angry, Frown, Laugh, Meh } from "lucide-react";
 import type { CSSProperties } from "react";
 
 import { EMOTION_UI } from "@/app/(app)/logs/log-card-utils";
+import { TagPicker } from "@/components/tag-picker";
 
 // 気分の選択肢。value は postSchema の z.enum と一致させる（見た目のラベルだけ変更可）
 const MOODS = [
@@ -34,6 +35,7 @@ export function LogForm({
   submitLabel,
   submittingLabel,
   cancelHref,
+  tagOptions,
 }: {
   defaultValues: PostInput;
   onSubmit: (data: PostInput) => Promise<string | void>;
@@ -41,6 +43,8 @@ export function LogForm({
   submittingLabel: string;
   // 「一覧に戻る」リンク。渡された画面だけに表示する（/post では渡さないので出ない）
   cancelHref?: string;
+  // このユーザーが今までに作ったタグ名（タグ選択の候補）
+  tagOptions: string[];
 }) {
   const form = useForm({
     resolver: zodResolver(postSchema),
@@ -101,6 +105,24 @@ export function LogForm({
           <FieldError errors={[form.formState.errors.tomorrow]} />
         </Field>
       </div>
+
+      <Separator className="my-5" />
+
+      <section>
+        <h3 className="mb-3 font-bold">タグ</h3>
+        <Controller
+          control={form.control}
+          name="tags"
+          render={({ field }) => (
+            <TagPicker value={field.value} onChange={field.onChange} options={tagOptions} />
+          )}
+        />
+        {form.formState.errors.tags && (
+          <p className="mt-2 text-sm text-destructive">
+            {form.formState.errors.tags.message ?? "タグの内容を確認してください"}
+          </p>
+        )}
+      </section>
 
       <Separator className="my-5" />
 

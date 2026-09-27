@@ -12,9 +12,10 @@ type EditableLog = {
   badThing: string | null;
   tomorrowPlan: string;
   emotionCode: string | null;
+  tags: string[];
 };
 
-export function EditLogForm({ log }: { log: EditableLog }) {
+export function EditLogForm({ log, tagOptions }: { log: EditableLog; tagOptions: string[] }) {
   const router = useRouter();
 
   // log.emotionCode は string | null なので、postSchema の mood(enum) と型上は一致しない。
@@ -25,6 +26,7 @@ export function EditLogForm({ log }: { log: EditableLog }) {
       tomorrow: log.tomorrowPlan,
       mood: (log.emotionCode ?? "normal") as PostInput["mood"],
       bad: log.badThing ?? "",
+      tags: log.tags,
   }
 
   return (
@@ -45,6 +47,7 @@ export function EditLogForm({ log }: { log: EditableLog }) {
         submitLabel="更新する"
         submittingLabel="更新中…"
         cancelHref="/logs"
+        tagOptions={tagOptions}
     />
   )
 }

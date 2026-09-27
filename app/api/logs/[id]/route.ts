@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { postSchema } from "@/lib/validations/post"
 import { toJsonSafe } from "@/lib/serialize";
 import { createClient } from "@/lib/supabase/server";
+import { replaceLogTags } from "@/lib/tags";
 
 async function requireUserId() {
   const supabase = await createClient()
@@ -26,21 +27,26 @@ export async function PATCH(request: Request, context: RouteContext<"/api/logs/[
     return NextResponse.json({ error: z.treeifyError(parsed.error) }, { status: 400 });
   }
 
-  const { today, good, tomorrow, bad, mood } = parsed.data;
+  const { today, good, tomorrow, bad, mood, tags } = parsed.data;
   const { id } = await context.params;
   try {
     const emotion = await prisma.emotion.findUnique({ where: { code: mood } });
 
     // loggedDate（記録日）はこの画面のUIに存在しないので、更新データに含めず元の値のまま残す
-    const log = await prisma.log.update({
-      where: { id: BigInt(id) },
-      data: {
-        didToday: today,
-        goodThing: good,
-        tomorrowPlan: tomorrow,
-        badThing: bad,
-        emotionId: emotion?.id,
-      },
+    // ログの更新とタグの付け替えを1つのトランザクションにまとめる
+    const log = await prisma.$transaction(async (tx) => {
+      const updated = await tx.log.update({
+        where: { id: BigInt(id) },
+        data: {
+          didToday: today,
+          goodThing: good,
+          tomorrowPlan: tomorrow,
+          badThing: bad,
+          emotionId: emotion?.id,
+        },
+      });
+      await replaceLogTags(tx, userId, updated.id, tags);
+      return updated;
     });
 
     return NextResponse.json(toJsonSafe(log), { status: 200 });

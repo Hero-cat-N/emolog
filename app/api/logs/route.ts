@@ -6,6 +6,7 @@ import { postSchema } from "@/lib/validations/post"
 import { toJsonSafe } from "@/lib/serialize"
 import { createClient } from "@/lib/supabase/server"
 import { startOfUTCDay } from "@/lib/date"
+import { replaceLogTags } from "@/lib/tags"
 
 // proxy.ts の保護対象から /api は除外しているため、ここで自前にログイン確認する
 async function requireUserId() {
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: z.treeifyError(parsed.error) }, { status: 400 })
   }
 
-  const { today, good, tomorrow, bad, mood } = parsed.data
+  const { today, good, tomorrow, bad, mood, tags } = parsed.data
 
   // note:loggedDate はフォームの入力項目ではなく、カレンダーでどの日を選んだかから決まる。
   // note:未指定（/postから普通に投稿した場合）なら「今日」を使う
@@ -48,17 +49,21 @@ export async function POST(request: Request) {
   try {
     const emotion = await prisma.emotion.findUnique({ where: { code: mood } })
 
-    // note: 新しくprismaを使用してログを制作する
-    const log = await prisma.log.create({
-      data: {
-        userId,
-        didToday: today,
-        goodThing: good,
-        tomorrowPlan: tomorrow,
-        badThing: bad,
-        loggedDate,
-        emotionId: emotion?.id,
-      },
+    // note: ログの作成とタグの紐づけを1つのトランザクションにまとめる（途中で失敗したら両方なかったことになる）
+    const log = await prisma.$transaction(async (tx) => {
+      const created = await tx.log.create({
+        data: {
+          userId,
+          didToday: today,
+          goodThing: good,
+          tomorrowPlan: tomorrow,
+          badThing: bad,
+          loggedDate,
+          emotionId: emotion?.id,
+        },
+      })
+      await replaceLogTags(tx, userId, created.id, tags)
+      return created
     })
 
     return NextResponse.json(toJsonSafe(log), { status: 201 })
