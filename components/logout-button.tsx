@@ -20,14 +20,17 @@ export function LogoutButton() {
   }
 
   return (
+    // ページヘッダー右上のアイコンボタン（34×34 / radius 10 / cream-100 背景）
     <Button
-      variant="ghost"
-      size="icon-sm"
+      variant="secondary"
+      size="icon"
       aria-label="ログアウト"
+      title="ログアウト"
       onClick={handleLogout}
       disabled={isLoggingOut}
+      className="size-8.5 rounded-[10px] text-ink-soft"
     >
-      <LogOut />
+      <LogOut className="size-4" strokeWidth={1.8} />
     </Button>
   );
 }
