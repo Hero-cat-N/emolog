@@ -18,6 +18,7 @@ model User {
   id String @id @db.Uuid
 
   logs Log[]
+  tags Tag[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -53,9 +54,38 @@ model Log {
   tomorrowPlan String   @map("tomorrow_plan")
   loggedDate   DateTime @map("logged_date") @db.Date
 
+  tags LogTag[]
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([userId, loggedDate])
   @@map("logs")
+}
+
+// タグ（「FF14」「零式」など）。ユーザーごとに持ち、同じユーザー内では名前が重複しない
+model Tag {
+  id     BigInt @id @default(autoincrement())
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name   String
+
+  logs LogTag[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, name])
+  @@map("tags")
+}
+
+// ログとタグの中間テーブル（1つのログに複数タグ、1つのタグに複数ログ = 多対多）。
+// ログやタグが消えたら紐づけも一緒に消す(onDelete: Cascade)
+model LogTag {
+  logId BigInt @map("log_id")
+  log   Log    @relation(fields: [logId], references: [id], onDelete: Cascade)
+  tagId BigInt @map("tag_id")
+  tag   Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([logId, tagId])
+  @@map("log_tags")
 }
