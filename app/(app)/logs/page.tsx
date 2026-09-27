@@ -1,15 +1,12 @@
-import { Search } from "lucide-react";
-
 import { prisma } from "@/lib/prisma";
-import { Button } from "@/components/ui/button";
 import { AppShell } from "../_components/app-shell";
-import { LogsCalendar } from "./logs-calendar";
+import { LogsBrowser, LogsListHeader } from "./logs-browser";
 
 export const dynamic = "force-dynamic";
 
 export default async function LogsPage() {
   const logs = await prisma.log.findMany({
-    orderBy: { loggedDate: "asc" },
+    orderBy: [{ loggedDate: "asc" }, { id: "asc" }],
     include: { emotion: true },
   });
 
@@ -26,27 +23,10 @@ export default async function LogsPage() {
     tomorrowPlan: log.tomorrowPlan,
   }));
 
+  // lg 以上は一覧ペインが自前のヘッダーを持つので、共通ヘッダーは SP だけ（paneLayout）
   return (
-    <AppShell
-      header={
-        <div className="flex items-center justify-between px-6 pt-6 pb-4">
-          <h1 className="font-heading text-xl font-bold text-foreground">ログ一覧</h1>
-          {/* 検索（形だけ・未実装） */}
-          <Button
-            variant="secondary"
-            size="icon"
-            aria-label="検索"
-            className="size-10 rounded-xl"
-            disabled
-          >
-            <Search />
-          </Button>
-        </div>
-      }
-    >
-      <div className="px-6 py-5">
-        <LogsCalendar logs={views} />
-      </div>
+    <AppShell header={<LogsListHeader />} paneLayout>
+      <LogsBrowser logs={views} />
     </AppShell>
   );
 }

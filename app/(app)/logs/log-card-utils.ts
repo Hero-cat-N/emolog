@@ -55,3 +55,11 @@ export function formatLoggedDate(date: Date) {
     short: `${month}/${day}（${weekday}）`,
   };
 }
+
+// 日付順に並んだログ配列の中から、指定IDの「前の日」「次の日」のログを探す。
+// 詳細画面の前日/翌日ナビ用。見つからなければ両方 null
+export function findNeighbors(logs: LogView[], id: string) {
+  const index = logs.findIndex((log) => log.id === id);
+  if (index === -1) return { older: null, newer: null };
+  return { older: logs[index - 1] ?? null, newer: logs[index + 1] ?? null };
+}
