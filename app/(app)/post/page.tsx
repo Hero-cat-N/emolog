@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 import { AppShell, PageHeading } from "../_components/app-shell";
 import { LogForm } from "@/components/log-form";
@@ -84,9 +85,11 @@ function PostForm() {
             return typeof body?.error === "string" ? body.error : "保存に失敗しました";
           }
 
-          if (isBackfill) {
-            router.push("/logs");
-          }
+          // 成功したときだけここに来る（失敗時は上で return してフォームにエラーを出す）。
+          // toast は layout の <Toaster /> に出るので、この直後に画面遷移しても消えない
+          toast.success("保存しました！");
+          // 過去の日の追加はカレンダーから来るので一覧へ、今日の記録はホームへ戻す
+          router.push(isBackfill ? "/logs" : "/");
         }}
       />
     </AppShell>
