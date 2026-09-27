@@ -13,6 +13,9 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { postSchema, type PostInput } from "@/lib/validations/post";
 import Link from "next/link";
 import { Angry, Frown, Laugh, Meh } from "lucide-react";
+import type { CSSProperties } from "react";
+
+import { EMOTION_UI } from "@/app/(app)/logs/log-card-utils";
 
 // 気分の選択肢。value は postSchema の z.enum と一致させる（見た目のラベルだけ変更可）
 const MOODS = [
@@ -48,8 +51,9 @@ export function LogForm({
   const charCount = (values.today?.length ?? 0) + (values.good?.length ?? 0) + (values.bad?.length ?? 0) + (values.tomorrow?.length ?? 0);
 
   return (
+    // PC ではモーダル相当の幅（720px）に収め、4項目を2×2に並べて縦スクロールを減らす
     <form
-      className="px-6 py-5"
+      className="w-full px-5 py-4.5 lg:mx-auto lg:max-w-180 lg:px-8 lg:py-7"
       onSubmit={form.handleSubmit(async (data) => {
         const errorMessage = await onSubmit(data);
         if (errorMessage) {
@@ -61,7 +65,7 @@ export function LogForm({
         form.reset();
       })}
     >
-      <div className="grid gap-5">
+      <div className="grid gap-5 lg:grid-cols-2 lg:gap-3.5">
         <Field>
           <FieldLabel htmlFor="today">
             今日やったこと
@@ -108,8 +112,21 @@ export function LogForm({
           render={({ field }) => (
             <ToggleGroup className="w-full justify-between gap-2" variant="outline" spacing={2} value={[field.value]} onValueChange={(val) => field.onChange(val[0])}>
               {MOODS.map((mood) => (
-                <ToggleGroupItem key={mood.value} value={mood.value} aria-label={mood.label} className="flex h-auto flex-1 flex-col gap-1 rounded-xl py-3 aria-pressed:border-primary aria-pressed:bg-accent aria-pressed:text-accent-foreground">
-                  <mood.icon className="size-6" />
+                // 感情ごとの色は EMOTION_UI（アプリ全体で共通）から取り、CSS変数で渡す。
+                // 選択中は「感情色の1.5px枠 + ティント背景」（Handoff 1d）
+                <ToggleGroupItem
+                  key={mood.value}
+                  value={mood.value}
+                  aria-label={mood.label}
+                  style={
+                    {
+                      "--mood": EMOTION_UI[mood.value].color,
+                      "--mood-tint": EMOTION_UI[mood.value].tint,
+                    } as CSSProperties
+                  }
+                  className="flex h-auto flex-1 flex-col gap-1 rounded-xl py-3 aria-pressed:border-[1.5px] aria-pressed:border-(--mood) aria-pressed:bg-(--mood-tint) aria-pressed:font-bold aria-pressed:text-foreground"
+                >
+                  <mood.icon className="size-6" strokeWidth={1.8} style={{ color: EMOTION_UI[mood.value].color }} />
                   <span className="text-xs">{mood.label}</span>
                 </ToggleGroupItem>
               ))}

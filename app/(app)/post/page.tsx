@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { AppShell } from "../_components/app-shell";
+import { AppShell, PageHeading } from "../_components/app-shell";
 import { LogForm } from "@/components/log-form";
 import type { PostInput } from "@/lib/validations/post";
 
@@ -56,14 +56,12 @@ function PostForm() {
   return (
     <AppShell
       header={
-        <header className="flex items-center justify-between px-6 pt-6 pb-4">
-          <h2 className="font-heading text-xl font-bold">
-            {isBackfill ? "記録を追加" : "今日の記録"}
-          </h2>
-          <span className="text-sm text-muted-foreground">
+        <div className="flex items-center justify-between">
+          <PageHeading>{isBackfill ? "記録を追加" : "今日の記録"}</PageHeading>
+          <span className="text-xs text-muted-foreground lg:text-[12.5px]">
             {isBackfill ? backfillLabel : dateLabel}
           </span>
-        </header>
+        </div>
       }
     >
       <LogForm
