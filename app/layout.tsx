@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono, M_PLUS_Rounded_1c, Noto_Sans_JP, Quicksand } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 // note: 日本語フォント(M PLUS Rounded 1c / Noto Sans JP)にはsubsetsの"japanese"という
@@ -37,7 +38,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="ja"
       className={`${mplusRounded.variable} ${notoSansJP.variable} ${quicksand.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        {/* toast の表示場所。layout に置くので、画面遷移しても通知が消えない。
+            アプリはライトテーマのみなので light に固定（OS がダークでも黒くしない） */}
+        <Toaster theme="light" position="top-center" />
+      </body>
     </html>
   );
 }

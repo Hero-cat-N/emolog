@@ -2,6 +2,19 @@
 // log-card.tsx は "use client" なので、そこに置いた関数は Server Component から呼べない。
 // Server Component（例: logs/[id]/page.tsx）でも使うものはここに置く。
 
+import { notFound } from "next/navigation";
+import { Angry, Frown, Laugh, Meh, type LucideIcon } from "lucide-react";
+
+// URLの id 部分（文字列）を BigInt に変換する。失敗したら 404 扱い。
+// logs/[id]/page.tsx と logs/[id]/edit/page.tsx の両方が使うのでここに集約
+export function parseId(id: string): bigint {
+  try {
+    return BigInt(id);
+  } catch {
+    notFound();
+  }
+}
+
 // サーバ(page.tsx)からクライアントに渡すログ1件の形。
 // Prisma の Log をそのまま渡すと BigInt が混ざって渡せないので、必要な項目だけの素のオブジェクトにする
 export type LogView = {
@@ -13,19 +26,22 @@ export type LogView = {
   goodThing: string;
   badThing: string | null;
   tomorrowPlan: string;
+  tags: string[];
 };
 
 // 感情コードごとの表示設定。
-// emoji は「感情そのもの」を表すコンテンツなので絵文字を使う（design.md 7節）。
+// icon はlucideの線画アイコン（他のUI部品と統一するため絵文字から変更）。
 // tint はカード上部の感情バッジ用の背景色。ベタ塗りせず感情色のティントにする（design.md 7節）。
-export const EMOTION_UI: Record<string, { emoji: string; tint: string }> = {
-  fun: { emoji: "😄", tint: "#E3F3EA" },
-  normal: { emoji: "😐", tint: "#EFEBE4" },
-  sad: { emoji: "😞", tint: "#E6ECF7" },
-  frustrate: { emoji: "😤", tint: "#FBEEE7" },
-  tired: { emoji: "😴", tint: "#EEEAF6" },
+// color は感情そのものの色（globals.css の --emotion-*）。分析画面のバー等で使う。
+export const EMOTION_UI: Record<string, { icon: LucideIcon; tint: string; color: string }> = {
+  fun: { icon: Laugh, tint: "#E3F3EA", color: "var(--emotion-happy)" },
+  normal: { icon: Meh, tint: "#EFEBE4", color: "var(--emotion-neutral)" },
+  sad: { icon: Frown, tint: "#E6ECF7", color: "var(--emotion-sad)" },
+  frustrate: { icon: Angry, tint: "#FBEEE7", color: "var(--emotion-angry)" },
+  // lucideに「疲れ」にぴったりの表情アイコンが無いため、一旦 Meh を流用
+  tired: { icon: Meh, tint: "#EEEAF6", color: "var(--emotion-tired)" },
 };
-export const EMOTION_FALLBACK = { emoji: "🙂", tint: "#EFEBE4" };
+export const EMOTION_FALLBACK = { icon: Meh, tint: "#EFEBE4", color: "var(--emotion-neutral)" };
 
 const WEEKDAY = ["日", "月", "火", "水", "木", "金", "土"];
 
@@ -39,4 +55,12 @@ export function formatLoggedDate(date: Date) {
     weekday: `${weekday}曜日`,
     short: `${month}/${day}（${weekday}）`,
   };
+}
+
+// 日付順に並んだログ配列の中から、指定IDの「前の日」「次の日」のログを探す。
+// 詳細画面の前日/翌日ナビ用。見つからなければ両方 null
+export function findNeighbors(logs: LogView[], id: string) {
+  const index = logs.findIndex((log) => log.id === id);
+  if (index === -1) return { older: null, newer: null };
+  return { older: logs[index - 1] ?? null, newer: logs[index + 1] ?? null };
 }

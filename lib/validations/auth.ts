@@ -13,9 +13,6 @@ export const signupSchema = z.object({
   email: z.email({ message: "正しいメールアドレスを入力してください" }),
   password: z
     .string()
-    // TODO(human): パスワードの強度ルールをここに追加する(.min() や .regex() をチェーンする)
-    //   参考: node_modules/next/dist/docs/01-app/02-guides/authentication.md の SignupFormSchema
-    //   (8文字以上 / 英字を含む / 数字を含む / 記号を含む、など)
     .nonempty({ message: "パスワードを入力してください" })
     .min(8, "8文字以上で入力してください")
     .regex(/[a-z]/, { message: "小文字を1文字以上含めてください" })

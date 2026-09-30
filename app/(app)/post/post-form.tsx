@@ -1,0 +1,89 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+
+import { AppShell, PageHeading } from "../_components/app-shell";
+import { LogForm } from "@/components/log-form";
+import type { PostInput } from "@/lib/validations/post";
+
+const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
+
+// "2026-09-15" のような日付だけの文字列を、DBのloggedDate（UTC0時）と同じ形のDateにする
+function parseDateParam(value: string | null): Date | null {
+  if (!value) return null;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+  const [, y, m, d] = match;
+  return new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
+}
+
+// 記録フォームの画面本体（クライアント側）。タグの候補は DB を読める page.tsx から受け取る
+export function PostForm({ tagOptions }: { tagOptions: string[] }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // ?date=2026-09-15 が付いていたら「その日の記録を追加する」画面、無ければ「今日の記録」画面
+  const targetDate = useMemo(() => parseDateParam(searchParams.get("date")), [searchParams]);
+  const isBackfill = targetDate !== null;
+
+  // ヘッダーの日付。SSR とクライアントで差が出ないよう mount 後にセットする（今日の場合のみ）
+  const [dateLabel, setDateLabel] = useState("");
+  useEffect(() => {
+    if (isBackfill) return;
+    setDateLabel(
+      new Intl.DateTimeFormat("ja-JP", {
+        month: "numeric",
+        day: "numeric",
+        weekday: "short",
+      }).format(new Date())
+    );
+  }, [isBackfill]);
+
+  const backfillLabel = targetDate
+    ? `${targetDate.getUTCMonth() + 1}/${targetDate.getUTCDate()}（${WEEKDAYS[targetDate.getUTCDay()]}）`
+    : "";
+
+  return (
+    <AppShell
+      header={
+        <div className="flex items-center justify-between">
+          <PageHeading>{isBackfill ? "記録を追加" : "今日の記録"}</PageHeading>
+          <span className="text-xs text-muted-foreground lg:text-[12.5px]">
+            {isBackfill ? backfillLabel : dateLabel}
+          </span>
+        </div>
+      }
+    >
+      <LogForm
+        defaultValues={{ today: "", good: "", tomorrow: "", bad: "", mood: "normal", tags: [] }}
+        tagOptions={tagOptions}
+        submitLabel="保存する"
+        submittingLabel="保存中…"
+        cancelHref={isBackfill ? "/logs" : undefined}
+        onSubmit={async (data: PostInput) => {
+          const res = await fetch("/api/logs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...data,
+              loggedDate: targetDate ? targetDate.toISOString() : undefined,
+            }),
+          });
+
+          if (!res.ok) {
+            const body = await res.json().catch(() => null);
+            return typeof body?.error === "string" ? body.error : "保存に失敗しました";
+          }
+
+          // 成功したときだけここに来る（失敗時は上で return してフォームにエラーを出す）。
+          // toast は layout の <Toaster /> に出るので、この直後に画面遷移しても消えない
+          toast.success("保存しました！");
+          // 過去の日の追加はカレンダーから来るので一覧へ、今日の記録はホームへ戻す
+          router.push(isBackfill ? "/logs" : "/");
+        }}
+      />
+    </AppShell>
+  );
+}

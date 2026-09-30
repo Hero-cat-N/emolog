@@ -4,29 +4,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
-import { LogoutButton } from "@/components/logout-button";
+import { NAV_TABS, isActiveTab } from "./nav-tabs";
 
-const TABS = [
-  { href: "/post", label: "記録する" },
-  { href: "/logs", label: "一覧" },
-  { href: "/analytics", label: "分析", disabled: true },
-];
-
+// SP（md未満）の上部ヘッダーナビ。4等分・文字だけ。アクティブは文字色＋下線2px
 export function PageTabs() {
   // 今表示している URL のパス（例: "/logs"）。ページ遷移するたびに新しい値になる
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center border-b text-sm">
-      {TABS.map((tab) => {
-        const isActive = pathname === tab.href;
+    <nav className="flex border-b border-line bg-card">
+      {NAV_TABS.map((tab) => {
+        const isActive = isActiveTab(pathname, tab.href);
+        const base = "-mb-px flex-1 border-b-2 px-1 py-3.25 text-center text-[12.5px]";
 
         if (tab.disabled) {
           return (
-            <span
-              key={tab.href}
-              className="flex-1 px-4 py-3 text-center text-muted-foreground/50"
-            >
+            <span key={tab.href} className={cn(base, "border-transparent text-muted-foreground/50")}>
               {tab.label}
             </span>
           );
@@ -38,19 +31,17 @@ export function PageTabs() {
             href={tab.href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "flex-1 px-4 py-3 text-center transition-colors",
+              base,
+              "transition-colors duration-150",
               isActive
-                ? "border-b-2 border-primary font-medium text-primary"
-                : "text-muted-foreground hover:text-foreground",
+                ? "border-brand font-bold text-accent-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground",
             )}
           >
             {tab.label}
           </Link>
         );
       })}
-      <div className="flex items-center px-2">
-        <LogoutButton />
-      </div>
     </nav>
   );
 }
