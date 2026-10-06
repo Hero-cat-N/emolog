@@ -1,11 +1,26 @@
+import { redirect } from "next/navigation";
+
 import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "../_components/app-shell";
 import { LogsBrowser, LogsListHeader } from "./logs-browser";
 
 export const dynamic = "force-dynamic";
 
 export default async function LogsPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const userId = user.id;
+
   const logs = await prisma.log.findMany({
+    where: { userId },
     orderBy: [{ loggedDate: "asc" }, { id: "asc" }],
     // タグは中間テーブル(log_tags)越しなので、その先の tag まで include する
     include: { emotion: true, tags: { include: { tag: true } } },
