@@ -26,9 +26,11 @@ export function AppShell({
       <SidebarNav />
 
       <div className="flex min-w-0 flex-1 flex-col">
+        {/* 高さは SP 80px / PC 88px で固定（中身は上下中央）。
+            loading.tsx の空ヘッダーと本物のヘッダーで高さが揃い、読み込み後に本文がずれない */}
         <header
           className={cn(
-            "border-b border-line bg-card px-5 py-4 lg:px-8 lg:py-5",
+            "flex h-20 shrink-0 flex-col justify-center border-b border-line bg-card px-5 lg:h-22 lg:px-8",
             paneLayout && "lg:hidden",
           )}
         >
