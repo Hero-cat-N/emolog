@@ -1,6 +1,7 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "../../_components/app-shell";
 import { LogDetailHeader } from "../log-card";
 import { parseId, type LogView } from "../log-card-utils";
@@ -14,8 +15,19 @@ export default async function LogDetailPage(props: PageProps<"/logs/[id]">) {
   const { id } = await props.params;
   const currentId = parseId(id);
 
-  // 一覧ペインと前後の日への移動用に全件を取る（件数が少ない個人アプリ想定）
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  // 一覧ペインと前後の日への移動用に自分のログを全件取る（件数が少ない個人アプリ想定）。
+  // 開いている id が他人のログならこの中に無いので、下の notFound() で 404 になる
   const logs = await prisma.log.findMany({
+    where: { userId: user.id },
     orderBy: [{ loggedDate: "asc" }, { id: "asc" }],
     // タグは中間テーブル(log_tags)越しなので、その先の tag まで include する
     include: { emotion: true, tags: { include: { tag: true } } },

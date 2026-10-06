@@ -21,8 +21,9 @@ export default async function EditLogPage(props: PageProps<"/logs/[id]/edit">) {
   }
 
   const [currentLog, tagOptions] = await Promise.all([
+    // userId もセットで絞り込み、URL の id を書き換えても他人のログは開けないようにする
     prisma.log.findUnique({
-      where: { id: currentId },
+      where: { id: currentId, userId: user.id },
       include: { emotion: true, tags: { include: { tag: true } } },
     }),
     // タグ選択の候補（このユーザーが今までに作ったタグ）
