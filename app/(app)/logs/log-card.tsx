@@ -149,7 +149,10 @@ function LogSection({ label, value }: { label: string; value?: string | null }) 
 
 // /api/logs/[id]/analyze が失敗したときに、ステータスコードからユーザー向けの文言を決める
 function analyzeErrorMessage(status: number): string {
-  // TODO(human): 429（無料枠の上限）・503（AIが混雑）・それ以外 で文言を出し分けて return する
+  if (status === 429) return "無料枠の上限に達しました。時間をおいて試してください";
+  if (status === 503) return "AIが混み合っています。少し待ってから試してください";
+  if (status === 404) return "ログが見つかりませんでした";
+  return "分析に失敗しました";
 }
 
 // 生成日時の表示。サーバー描画(UTC)とブラウザ(JST)で表示がずれないよう、タイムゾーンを固定する
