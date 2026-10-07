@@ -54,13 +54,34 @@ model Log {
   tomorrowPlan String   @map("tomorrow_plan")
   loggedDate   DateTime @map("logged_date") @db.Date
 
-  tags LogTag[]
+  tags      LogTag[]
+  aiSummary AiSummary?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([userId, loggedDate])
   @@map("logs")
+}
+
+// ログ1件ごとのAI分析結果（1対1）。行が無い = まだ分析していない。
+// ログ本体とは別テーブルにして、AIの出力でlogsテーブルを汚さない
+model AiSummary {
+  id    BigInt @id @default(autoincrement())
+  logId BigInt @unique @map("log_id")
+  log   Log    @relation(fields: [logId], references: [id], onDelete: Cascade)
+
+  keywords  String[] // 感情キーワード（Postgresの text[]）
+  summary   String // ひとこと要約
+  blogDraft String?  @map("blog_draft") // ブログ下書き。ボタンで生成するまでは null
+
+  // 分析した日時。log.updatedAt の方が新しければ「分析後にログが編集された = 結果が古い」と判定できる
+  generatedAt DateTime @map("generated_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("ai_summaries")
 }
 
 // タグ（「FF14」「零式」など）。ユーザーごとに持ち、同じユーザー内では名前が重複しない
