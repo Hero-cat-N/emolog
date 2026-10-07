@@ -27,7 +27,31 @@ export type LogView = {
   badThing: string | null;
   tomorrowPlan: string;
   tags: string[];
+  // AI分析の結果。まだ分析していないログは null
+  ai: LogAiView | null;
 };
+
+export type LogAiView = {
+  keywords: string[];
+  summary: string;
+  generatedAt: Date;
+  // 分析したあとにログが編集されていたら true（要約が今の内容とずれている可能性がある）
+  isStale: boolean;
+};
+
+// Prisma の AiSummary（include したもの）を画面用の形にする。2つのページで同じ変換をするのでここに置く
+export function toLogAiView(
+  aiSummary: { keywords: string[]; summary: string; generatedAt: Date } | null,
+  logUpdatedAt: Date,
+): LogAiView | null {
+  if (!aiSummary) return null;
+  return {
+    keywords: aiSummary.keywords,
+    summary: aiSummary.summary,
+    generatedAt: aiSummary.generatedAt,
+    isStale: logUpdatedAt > aiSummary.generatedAt,
+  };
+}
 
 // 感情コードごとの表示設定。
 // icon はlucideの線画アイコン（他のUI部品と統一するため絵文字から変更）。

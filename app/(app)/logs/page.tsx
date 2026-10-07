@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "../_components/app-shell";
+import { toLogAiView } from "./log-card-utils";
 import { LogsBrowser, LogsListHeader } from "./logs-browser";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ export default async function LogsPage() {
     where: { userId },
     orderBy: [{ loggedDate: "asc" }, { id: "asc" }],
     // タグは中間テーブル(log_tags)越しなので、その先の tag まで include する
-    include: { emotion: true, tags: { include: { tag: true } } },
+    include: { emotion: true, tags: { include: { tag: true } }, aiSummary: true },
   });
 
   // クライアントコンポーネントには BigInt を渡せないので、必要な項目だけの
@@ -38,6 +39,7 @@ export default async function LogsPage() {
     badThing: log.badThing,
     tomorrowPlan: log.tomorrowPlan,
     tags: log.tags.map((logTag) => logTag.tag.name),
+    ai: toLogAiView(log.aiSummary, log.updatedAt),
   }));
 
   // lg 以上は一覧ペインが自前のヘッダーを持つので、共通ヘッダーは SP だけ（paneLayout）

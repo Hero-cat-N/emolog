@@ -1,8 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Copy, Ellipsis, Share2, SquarePen, Trash2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Ellipsis,
+  Share2,
+  Sparkles,
+  SquarePen,
+  Trash2,
+} from "lucide-react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -12,6 +23,7 @@ import {
   EMOTION_FALLBACK,
   EMOTION_UI,
   formatLoggedDate,
+  type LogAiView,
   type LogView,
 } from "./log-card-utils";
 
@@ -86,7 +98,7 @@ export function LogDetailBody({
       </div>
 
       <aside className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
-        <LogAiPanel logId={log.id} />
+        <LogAiPanel logId={log.id} ai={log.ai} />
       </aside>
 
       {/* 前日 / 翌日 */}
@@ -135,10 +147,46 @@ function LogSection({ label, value }: { label: string; value?: string | null }) 
   );
 }
 
+// /api/logs/[id]/analyze が失敗したときに、ステータスコードからユーザー向けの文言を決める
+function analyzeErrorMessage(status: number): string {
+  // TODO(human): 429（無料枠の上限）・503（AIが混雑）・それ以外 で文言を出し分けて return する
+}
+
+// 生成日時の表示。サーバー描画(UTC)とブラウザ(JST)で表示がずれないよう、タイムゾーンを固定する
+function formatGeneratedAt(date: Date) {
+  return new Date(date).toLocaleString("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 // ── AI列（AI分析 + アクション） ──
-// note: いまは中身が全ログ共通のプレースホルダー。AI分析に実データを入れる段階で log を受け取る想定
-export function LogAiPanel({ logId }: { logId: string }) {
+export function LogAiPanel({ logId, ai }: { logId: string; ai: LogAiView | null }) {
   const router = useRouter();
+  // 無料枠のAIは返事に数秒〜十数秒かかるので、その間はボタンを止めて二重送信を防ぐ
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  async function handleAnalyze() {
+    setIsAnalyzing(true);
+    try {
+      const res = await fetch(`/api/logs/${logId}/analyze`, { method: "POST" });
+      if (!res.ok) {
+        toast.error(analyzeErrorMessage(res.status));
+        return;
+      }
+      toast.success("AI分析が完了しました");
+      // 保存された結果をサーバーから読み直して表示に反映する
+      router.refresh();
+    } catch {
+      toast.error("通信に失敗しました");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }
+
   async function handleDelete() {
     if (!confirm("このログを削除しますか?")) return;
     await fetch(`/api/logs/${logId}`, { method: "DELETE" });
@@ -150,24 +198,45 @@ export function LogAiPanel({ logId }: { logId: string }) {
 
   return (
     <div>
-      {/* AI分析（プレースホルダー：生成処理は未実装）。
-          AI由来ブロックは常に accent 配色 + ✨ でラベリングする（design.md 6節） */}
+      {/* AI分析。AI由来ブロックは常に accent 配色 + ✨ でラベリングする（design.md 6節） */}
       <div className="border-b border-line bg-accent px-5 py-4.5">
         <div className="mb-3 flex items-center gap-1.75">
           <span className="text-[13px] font-bold text-foreground">✨ AI 分析</span>
           <span className="rounded-full border border-[#F0C7B4] bg-card px-2 py-0.5 text-[9.5px] font-semibold text-accent-foreground">
             自動生成
           </span>
+          {ai && (
+            <span className="ml-auto text-[10px] text-muted-foreground">
+              {formatGeneratedAt(ai.generatedAt)}
+            </span>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
           <div className="rounded-[10px] bg-card px-3.25 py-2.75">
             <p className="mb-1.5 text-[10px] text-muted-foreground">感情キーワード</p>
-            <p className="text-xs text-muted-foreground">まだ分析されていません</p>
+            {ai ? (
+              <div className="flex flex-wrap gap-1.5">
+                {ai.keywords.map((keyword) => (
+                  <span
+                    key={keyword}
+                    className="rounded-full bg-accent px-2.5 py-0.5 text-[11px] text-accent-foreground"
+                  >
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">まだ分析されていません</p>
+            )}
           </div>
           <div className="rounded-[10px] bg-card px-3.25 py-2.75">
             <p className="mb-1.25 text-[10px] text-muted-foreground">ひとこと要約</p>
-            <p className="text-xs text-muted-foreground">まだ生成されていません</p>
+            {ai ? (
+              <p className="text-[12.5px] leading-[1.7] text-foreground">{ai.summary}</p>
+            ) : (
+              <p className="text-xs text-muted-foreground">まだ生成されていません</p>
+            )}
           </div>
           <div className="rounded-[10px] bg-card px-3.25 py-2.75">
             <p className="mb-1.25 text-[10px] text-muted-foreground">ブログ下書き</p>
@@ -176,6 +245,22 @@ export function LogAiPanel({ logId }: { logId: string }) {
             </p>
           </div>
         </div>
+
+        {/* 分析後にログを編集していたら、結果が古いことを知らせて再分析を促す */}
+        {ai?.isStale && (
+          <p className="mt-2.5 text-[10.5px] text-accent-foreground">
+            分析したあとにログが編集されています
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={handleAnalyze}
+          disabled={isAnalyzing}
+          className="mt-2.5 flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-[#F0C7B4] bg-card text-[12.5px] font-medium text-accent-foreground transition-colors duration-150 hover:bg-[#FDF6F2] disabled:opacity-60"
+        >
+          <Sparkles className="size-4" strokeWidth={1.8} />
+          {isAnalyzing ? "分析中…" : ai ? "もう一度分析する" : "AIで分析する"}
+        </button>
       </div>
 
       {/* アクション（シェア・コピーは未実装） */}
