@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // アプリのコードではないもの（Prisma の生成物・デザインの参考資料）
+    "lib/generated/**",
+    "design_handoff_emolog/**",
   ]),
 ]);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Badge } from "@/components/ui/badge";
@@ -51,7 +51,8 @@ export function LogForm({
     defaultValues,
   });
 
-  const values = form.watch();
+  // 文字数カウント用に入力中の値を購読する（form.watch() は React Compiler と相性が悪いので useWatch を使う）
+  const values = useWatch({ control: form.control });
   const charCount = (values.today?.length ?? 0) + (values.good?.length ?? 0) + (values.bad?.length ?? 0) + (values.tomorrow?.length ?? 0);
 
   return (

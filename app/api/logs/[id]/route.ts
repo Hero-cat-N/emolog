@@ -62,20 +62,17 @@ export async function PATCH(request: Request, context: RouteContext<"/api/logs/[
   }
 }
 
-// note: 「DELETE という名前の関数を作ると、Next.jsが [id] フォルダのURLで呼ばれたときに、この2つを自動で渡してくれる」という決まり文句
-//note: 受付係の「窓口オープン」。「DELETEのお願いが来たらこの窓口ね」とNext.jsに登録してる部分
-export async function DELETE(request: Request, context: RouteContext<"/api/logs/[id]">) {
+// DELETE /api/logs/[id]：ログを1件削除する（タグの紐づけ・AI分析は onDelete: Cascade で一緒に消える）
+export async function DELETE(_request: Request, context: RouteContext<"/api/logs/[id]">) {
   const userId = await requireUserId();
   if (!userId) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  //note: const { id } = await context.params;
   const { id } = await context.params;
 
   try {
-    //  受付が通訳（prisma）に「idが◯番のログ、DBから消しといて」と依頼。ここで初めてDBが実際に変更される
-    //  userId もセットで絞り込み、自分のログしか消せないようにする
+    // id だけだと他人のログも消せてしまうので、userId もセットで絞り込む
     await prisma.log.delete({ where: { id: BigInt(id), userId } });
 
     return NextResponse.json({ message: `Log ${id} deleted successfully` }, { status: 200 });

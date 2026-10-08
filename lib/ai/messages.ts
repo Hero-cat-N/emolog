@@ -2,7 +2,7 @@
 // "use client" のコンポーネントから読むので、サーバー専用のもの(prisma など)は import しない
 
 // /api/logs/[id]/analyze・blog-draft・/api/insights が失敗したときに、ステータスコードからユーザー向けの文言を決める
-export function analyzeErrorMessage(status: number, fallback = "分析に失敗しました"): string {
+export function aiErrorMessage(status: number, fallback = "分析に失敗しました"): string {
   if (status === 429) return "無料枠の上限に達しました。時間をおいて試してください";
   if (status === 503) return "AIが混み合っています。少し待ってから試してください";
   if (status === 504) return "AIの応答が遅いため中断しました。少し待ってから試してください";
@@ -17,7 +17,7 @@ export async function readAiErrorMessage(res: Response, fallback?: string): Prom
   const body = await res.json().catch(() => null);
   if (body?.error === "daily_limit") return "今日のAI生成の回数を使い切りました。明日また使えます";
   if (body?.error === "no_logs") return "この期間の記録がまだありません";
-  return analyzeErrorMessage(res.status, fallback);
+  return aiErrorMessage(res.status, fallback);
 }
 
 // 生成日時の表示。サーバー描画(UTC)とブラウザ(JST)で表示がずれないよう、タイムゾーンを固定する
