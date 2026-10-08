@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
+import { getRemainingAiUses } from "@/lib/ai/usage";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "../../_components/app-shell";
@@ -49,11 +50,13 @@ export default async function LogDetailPage(props: PageProps<"/logs/[id]">) {
   const current = views.find((log) => log.id === currentId.toString());
   if (!current) notFound();
 
+  const aiRemaining = await getRemainingAiUses(user.id);
+
   return (
     <AppShell header={<LogDetailHeader log={current} />} paneLayout>
       {/* key: 前日/翌日で別IDに移ったとき、選択日などの state を作り直させる
           （同じページ間の移動だと Next.js はコンポーネントを使い回すため） */}
-      <LogsBrowser key={current.id} logs={views} currentId={current.id} />
+      <LogsBrowser key={current.id} logs={views} currentId={current.id} aiRemaining={aiRemaining} />
     </AppShell>
   );
 }

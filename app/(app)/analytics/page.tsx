@@ -1,16 +1,16 @@
 import { redirect } from "next/navigation";
-import { Sparkles } from "lucide-react";
 
+import { getRemainingAiUses } from "@/lib/ai/usage";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
-import { startOfUTCDay } from "@/lib/date";
 import { AppShell, PageHeading, SectionLabel } from "../_components/app-shell";
 import { EMOTION_FALLBACK, EMOTION_UI } from "../logs/log-card-utils";
 import { calculateStreak } from "../streak";
 import { countByEmotion } from "./count-by-emotion";
 import { EmotionBreakdown } from "./emotion-breakdown";
 import { ComingSoon } from "./panel";
-import { parsePeriod } from "./period";
+import { InsightCard } from "./insight-card";
+import { getPeriodStart, parsePeriod } from "./period";
 import { PeriodTabs } from "./period-tabs";
 import { toScoreSeries } from "./score-series";
 import { ScoreTrendChart } from "./score-trend-chart";
@@ -35,11 +35,9 @@ export default async function AnalyticsPage({ // awaitを案つよ
   const userId = user.id;
   // 集計対象の期間（今日を含む直近N日）。URL の ?period= から決める
   const periodDays = parsePeriod((await searchParams).period);
-  const today = startOfUTCDay(new Date());
-  const periodStart = new Date(today);
-  periodStart.setUTCDate(periodStart.getUTCDate() - (periodDays - 1));
+  const periodStart = getPeriodStart(periodDays);
 
-  const [periodLogs, allDates] = await Promise.all([
+  const [periodLogs, allDates, insight, aiRemaining] = await Promise.all([
     // 期間内のログ（感情の内訳・記録日数・スコア推移に使う）。推移グラフのため古い順に並べる
     prisma.log.findMany({
       where: { userId, loggedDate: { gte: periodStart } },
@@ -52,6 +50,12 @@ export default async function AnalyticsPage({ // awaitを案つよ
       select: { loggedDate: true },
       orderBy: { loggedDate: "desc" },
     }),
+    // この期間の、保存済みの AI インサイト（まだ作っていなければ null）
+    prisma.insight.findUnique({
+      where: { userId_periodDays: { userId, periodDays } },
+      select: { content: true, generatedAt: true },
+    }),
+    getRemainingAiUses(userId),
   ]);
 
   const counts = countByEmotion(
@@ -135,16 +139,15 @@ export default async function AnalyticsPage({ // awaitを案つよ
               <ComingSoon className="h-12 bg-card" />
             </section>
 
-            {/* AIインサイト（プレースホルダー：未実装）。AI由来は ✨ + accent 配色 */}
+            {/* AIインサイト。保存済みの傾向文を出し、ボタンで作る/作り直す */}
             <section>
               <SectionLabel>インサイト（AI）</SectionLabel>
-              <div className="flex gap-2.25 rounded-[11px] border border-accent-border bg-accent p-2.75 lg:rounded-[14px] lg:p-4">
-                <Sparkles className="mt-0.5 size-4 shrink-0 text-accent-foreground" strokeWidth={1.8} />
-                <div>
-                  <p className="text-[12.5px] leading-normal text-foreground lg:text-[13.5px]">準備中です</p>
-                  <p className="mt-0.75 text-[10px] text-muted-foreground">✨ AI が期間の傾向をまとめます</p>
-                </div>
-              </div>
+              <InsightCard
+                periodDays={periodDays}
+                insight={insight}
+                remaining={aiRemaining}
+                hasLogs={periodLogs.length > 0}
+              />
             </section>
           </div>
         </div>

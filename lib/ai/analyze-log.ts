@@ -1,14 +1,7 @@
 // ログ1件を Gemini に渡して「感情キーワード」と「ひとこと要約」を作る。
-// AI の呼び出しはこのファイルだけに閉じ込めておき、API ルートや画面からは analyzeLog() だけを使う
-// (あとで Gemini 以外に乗り換えるときも、直すのはここだけで済むようにする)
-import { ApiError, GoogleGenAI } from "@google/genai";
+// API ルートや画面からは analyzeLog() だけを使う。Gemini 自体の呼び出し方は gemini.ts にまとめてある
 import { z } from "zod";
-
-// 無料枠で使えるモデル。2.5 系は新規ユーザーに提供終了しているので 3.8 を使う
-const MODEL = "gemini-3.8-flash";
-
-// GEMINI_API_KEY は .env.local に置く。NEXT_PUBLIC_ を付けないのでブラウザには渡らない
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+import { generateText } from "./gemini";
 
 // AI に返してほしい形。この zod スキーマを JSON Schema に変換して Gemini に渡し、
 // 返ってきた JSON もこのスキーマで検証する(形が崩れた応答を DB に入れないため)
@@ -30,6 +23,28 @@ export type AnalyzeLogInput = {
   tags: string[];
 };
 
+// Prisma で emotion と tags.tag を include して取ったログを、AI に渡す形に変える。
+// 分析・ブログ下書きの両方の API ルートで使う
+export function toAnalyzeLogInput(log: {
+  loggedDate: Date;
+  emotion: { label: string } | null;
+  didToday: string;
+  goodThing: string;
+  badThing: string | null;
+  tomorrowPlan: string;
+  tags: { tag: { name: string } }[];
+}): AnalyzeLogInput {
+  return {
+    loggedDate: log.loggedDate,
+    emotionLabel: log.emotion?.label ?? null,
+    didToday: log.didToday,
+    goodThing: log.goodThing,
+    badThing: log.badThing,
+    tomorrowPlan: log.tomorrowPlan,
+    tags: log.tags.map((logTag) => logTag.tag.name),
+  };
+}
+
 function buildPrompt(log: AnalyzeLogInput): string {
   return `以下はゲームプレイ日記です。やったこと、良かったこと、モヤったこと、タグの内容から、「ひとこと要約」として40字以内にまとめてほしい。「感情キーワード」はまとめた内容から「達成感」などの名詞として1～5個ほど設定してほしい。良かった感情だけでなく、モヤった感情もキーワードに含めてほしい。
 
@@ -41,30 +56,15 @@ function buildPrompt(log: AnalyzeLogInput): string {
   `
 }
 
-// 無料枠のモデルは混雑で 503 がよく返るので、少し待って数回だけやり直す。
-// 429(1日の上限超え)は待っても回復しないのでやり直さない
-const MAX_ATTEMPTS = 3;
-const RETRY_DELAY_MS = 2000;
-
 export async function analyzeLog(log: AnalyzeLogInput): Promise<LogAnalysis> {
-  for (let attempt = 1; ; attempt++) {
-    try {
-      const response = await ai.models.generateContent({
-        model: MODEL,
-        contents: buildPrompt(log),
-        config: {
-          responseMimeType: "application/json",
-          responseJsonSchema: z.toJSONSchema(analysisSchema),
-        },
-      });
+  // タイムアウト・503の再試行は generateText の中でやる
+  const text = await generateText(buildPrompt(log), {
+    config: {
+      responseMimeType: "application/json",
+      responseJsonSchema: z.toJSONSchema(analysisSchema),
+    },
+  });
 
-      // response.text が空、または JSON として壊れている / スキーマに合わない場合は例外にする
-      return analysisSchema.parse(JSON.parse(response.text ?? ""));
-    } catch (error) {
-      const isBusy = error instanceof ApiError && error.status === 503;
-      if (!isBusy || attempt >= MAX_ATTEMPTS) throw error;
-      // 2秒 → 4秒 と、やり直すたびに待ち時間を延ばす
-      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS * attempt));
-    }
-  }
+  // JSON として壊れている / スキーマに合わない場合は例外にする
+  return analysisSchema.parse(JSON.parse(text));
 }

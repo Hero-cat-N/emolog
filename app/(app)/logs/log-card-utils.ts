@@ -34,6 +34,8 @@ export type LogView = {
 export type LogAiView = {
   keywords: string[];
   summary: string;
+  // ブログ下書き。ボタンで生成するまでは null
+  blogDraft: string | null;
   generatedAt: Date;
   // 分析したあとにログが編集されていたら true（要約が今の内容とずれている可能性がある）
   isStale: boolean;
@@ -41,13 +43,14 @@ export type LogAiView = {
 
 // Prisma の AiSummary（include したもの）を画面用の形にする。2つのページで同じ変換をするのでここに置く
 export function toLogAiView(
-  aiSummary: { keywords: string[]; summary: string; generatedAt: Date } | null,
+  aiSummary: { keywords: string[]; summary: string; blogDraft: string | null; generatedAt: Date } | null,
   logUpdatedAt: Date,
 ): LogAiView | null {
   if (!aiSummary) return null;
   return {
     keywords: aiSummary.keywords,
     summary: aiSummary.summary,
+    blogDraft: aiSummary.blogDraft,
     generatedAt: aiSummary.generatedAt,
     isStale: logUpdatedAt > aiSummary.generatedAt,
   };

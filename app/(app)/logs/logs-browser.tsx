@@ -72,7 +72,16 @@ export function LogsListHeader() {
 // /logs と /logs/[id] の両方が使う「一覧ペイン + 詳細ペイン」。
 // currentId なし（/logs）      : SP は一覧だけ。lg は一覧 + 選んだ日の詳細
 // currentId あり（/logs/[id]） : SP は詳細だけ。lg は一覧（その日を選択済み）+ 詳細
-export function LogsBrowser({ logs, currentId }: { logs: LogView[]; currentId?: string }) {
+export function LogsBrowser({
+  logs,
+  currentId,
+  aiRemaining,
+}: {
+  logs: LogView[];
+  currentId?: string;
+  // 今日あと何回AI生成できるか（詳細のAI列に出す）
+  aiRemaining: number;
+}) {
   const now = new Date();
   const current = currentId ? logs.find((log) => log.id === currentId) : undefined;
   // 最初に選ぶ日：詳細を開いているならそのログの日（UTCで読んでローカル日付に直す）、無ければ今日
@@ -285,7 +294,12 @@ export function LogsBrowser({ logs, currentId }: { logs: LogView[]; currentId?: 
             <div className="hidden border-b border-line px-7 py-4 lg:block">
               <LogDetailHeader log={detailLog} />
             </div>
-            <LogDetailBody log={detailLog} older={neighbors.older} newer={neighbors.newer} />
+            <LogDetailBody
+              log={detailLog}
+              older={neighbors.older}
+              newer={neighbors.newer}
+              aiRemaining={aiRemaining}
+            />
           </>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-7 text-center">

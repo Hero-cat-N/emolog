@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { getRemainingAiUses } from "@/lib/ai/usage";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "../_components/app-shell";
@@ -42,10 +43,12 @@ export default async function LogsPage() {
     ai: toLogAiView(log.aiSummary, log.updatedAt),
   }));
 
+  const aiRemaining = await getRemainingAiUses(userId);
+
   // lg 以上は一覧ペインが自前のヘッダーを持つので、共通ヘッダーは SP だけ（paneLayout）
   return (
     <AppShell header={<LogsListHeader />} paneLayout>
-      <LogsBrowser logs={views} />
+      <LogsBrowser logs={views} aiRemaining={aiRemaining} />
     </AppShell>
   );
 }
