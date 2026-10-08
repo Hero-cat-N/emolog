@@ -17,8 +17,13 @@ export type InsightInput = {
   summaries: { date: string; summary: string; keywords: string[] }[];
 };
 
-function formatScore(score: number | null) {
-  return score === null ? "なし" : score.toFixed(1);
+// 感情スコア(楽しい5 / 普通3 / 疲れ2 / 悲しい・イライラ1)の平均を、気分の言葉に置き換える。
+// 数字のまま渡すと AI が「平均3.2」のようにそのまま書いてしまうので、言葉だけを渡す
+export function describeMood(score: number | null): string {
+  if (score === null) return "記録なし";
+  if (score >= 3.5) return "楽しい寄りの気分";
+  if (score >= 2.0) return "落ち着いた（ふつう寄りの）気分";
+  return "疲れ・モヤモヤ寄りの気分";
 }
 
 function buildInsightPrompt(input: InsightInput): string {
@@ -34,7 +39,8 @@ function buildInsightPrompt(input: InsightInput): string {
 この期間の気分や感情の傾向を、本人に語りかけるように2〜3文（120〜180字）でまとめてください。
 
 # 書き方
-- 下の数字と要約に書かれていることだけを根拠にする。数字を言い換えたり、新しく計算したりしない
+- 下の集計と要約に書かれていることだけを根拠にする。新しく計算したりしない
+- 気分は「楽しい寄りの気分」などの言葉で表し、スコアの数字は文章に出さない
 - 良かった点だけでなく、モヤっていた点や気分の変化にも触れる
 - 最後の1文は、次の期間に向けた前向きなひとことにする
 - 見出しや箇条書きは使わない
@@ -42,7 +48,8 @@ function buildInsightPrompt(input: InsightInput): string {
 # 集計
 記録日数: ${input.recordedDays}日 / ${input.periodDays}日
 感情の内訳: ${emotions}
-感情スコア(1〜5)の平均: ${formatScore(input.averageScore)}（前半 ${formatScore(input.firstHalfAverage)} → 後半 ${formatScore(input.secondHalfAverage)}）
+期間全体の気分: ${describeMood(input.averageScore)}
+気分の変化: 前半は${describeMood(input.firstHalfAverage)} → 後半は${describeMood(input.secondHalfAverage)}
 よく付けたタグ: ${tags}
 
 # 各日のひとこと要約（AI分析済みの日のみ）
