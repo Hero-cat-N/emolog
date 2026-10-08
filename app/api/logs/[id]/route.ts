@@ -2,17 +2,17 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/lib/generated/prisma/client";
-import { postSchema } from "@/lib/validations/post"
+import { postSchema } from "@/lib/validations/post";
 import { toJsonSafe } from "@/lib/serialize";
 import { createClient } from "@/lib/supabase/server";
 import { replaceLogTags } from "@/lib/tags";
 
 async function requireUserId() {
-  const supabase = await createClient()
+  const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser()
-  return user?.id ?? null
+  } = await supabase.auth.getUser();
+  return user?.id ?? null;
 }
 
 export async function PATCH(request: Request, context: RouteContext<"/api/logs/[id]">) {

@@ -59,5 +59,9 @@ export function PageHeading({ children }: { children: ReactNode }) {
 
 // 本文内のセクションラベル（「直近7日間」「感情の内訳」など）
 export function SectionLabel({ children }: { children: ReactNode }) {
-  return <h2 className="mb-1.75 text-[11px] font-bold text-ink-soft lg:mb-2.25 lg:text-xs">{children}</h2>;
+  return (
+    <h2 className="mb-1.75 text-[11px] font-bold text-ink-soft lg:mb-2.25 lg:text-xs">
+      {children}
+    </h2>
+  );
 }

@@ -100,7 +100,9 @@ export default async function AnalyticsPage({
       header={
         <div className="flex items-center justify-between">
           <PageHeading>感情ログ</PageHeading>
-          <span className="text-[11.5px] text-muted-foreground lg:text-[12.5px]">直近{periodDays}日間</span>
+          <span className="text-[11.5px] text-muted-foreground lg:text-[12.5px]">
+            直近{periodDays}日間
+          </span>
         </div>
       }
     >
@@ -115,7 +117,10 @@ export default async function AnalyticsPage({
           </div>
           <div className={metricCard}>
             {topEmotion ? (
-              <topEmotionUI.icon className="size-6 lg:size-8" style={{ color: topEmotionUI.color }} />
+              <topEmotionUI.icon
+                className="size-6 lg:size-8"
+                style={{ color: topEmotionUI.color }}
+              />
             ) : (
               <span className={metricValue}>—</span>
             )}

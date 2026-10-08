@@ -109,17 +109,27 @@ export default async function DashboardPage() {
                 {monthCount}
                 <span className="text-xs font-medium lg:text-[15px]">件</span>
               </p>
-              <p className="mt-0.5 text-[10px] text-muted-foreground lg:mt-1.5 lg:text-xs">今月の記録</p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground lg:mt-1.5 lg:text-xs">
+                今月の記録
+              </p>
             </div>
             <div className="flex flex-1 flex-col items-center justify-center rounded-[14px] bg-muted px-2.5 py-3.25 lg:rounded-2xl lg:p-5">
-              <recentEmotion.icon className="size-7 lg:size-8" style={{ color: recentEmotion.color }} />
-              <p className="mt-0.5 text-[10px] text-muted-foreground lg:mt-1.5 lg:text-xs">直近の気分</p>
+              <recentEmotion.icon
+                className="size-7 lg:size-8"
+                style={{ color: recentEmotion.color }}
+              />
+              <p className="mt-0.5 text-[10px] text-muted-foreground lg:mt-1.5 lg:text-xs">
+                直近の気分
+              </p>
             </div>
           </div>
 
           {/* AI傾向：分析画面で作った最新のインサイトを出す。AI由来は ✨ + accent 配色 */}
           <div className="flex gap-2.5 rounded-[14px] border border-accent-border bg-accent p-3.25 lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4.5">
-            <Sparkles className="mt-0.5 size-4 shrink-0 text-accent-foreground lg:size-4.5" strokeWidth={1.8} />
+            <Sparkles
+              className="mt-0.5 size-4 shrink-0 text-accent-foreground lg:size-4.5"
+              strokeWidth={1.8}
+            />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span className="inline-block rounded-full border border-[#F0C7B4] bg-card px-2 py-0.5 text-[9.5px] font-bold text-accent-foreground lg:text-[10px]">
@@ -127,7 +137,8 @@ export default async function DashboardPage() {
                 </span>
                 {latestInsight && (
                   <span className="text-[10px] text-muted-foreground lg:text-[11px]">
-                    直近{latestInsight.periodDays}日間 · {formatGeneratedAt(latestInsight.generatedAt)}
+                    直近{latestInsight.periodDays}日間 ·{" "}
+                    {formatGeneratedAt(latestInsight.generatedAt)}
                   </span>
                 )}
               </div>

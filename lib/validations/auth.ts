@@ -16,8 +16,7 @@ export const signupSchema = z.object({
     .nonempty({ message: "パスワードを入力してください" })
     .min(8, "8文字以上で入力してください")
     .regex(/[a-z]/, { message: "小文字を1文字以上含めてください" })
-    .regex(/[A-Z]/, { message: "大文字を1文字以上含めてください" })
-
+    .regex(/[A-Z]/, { message: "大文字を1文字以上含めてください" }),
 });
 
 export type SignupInput = z.infer<typeof signupSchema>;

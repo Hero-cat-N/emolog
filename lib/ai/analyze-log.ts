@@ -53,7 +53,7 @@ function buildPrompt(log: AnalyzeLogInput): string {
   良かったこと: ${log.goodThing}
   モヤったこと: ${log.badThing ?? "なし"}
   タグ： ${log.tags}
-  `
+  `;
 }
 
 export async function analyzeLog(log: AnalyzeLogInput): Promise<LogAnalysis> {

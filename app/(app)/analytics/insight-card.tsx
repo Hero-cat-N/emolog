@@ -59,7 +59,8 @@ export function InsightCard({
                 {insight.content}
               </p>
               <p className="mt-1 text-[10px] text-muted-foreground">
-                ✨ AI が直近{periodDays}日間の傾向をまとめました · {formatGeneratedAt(insight.generatedAt)}
+                ✨ AI が直近{periodDays}日間の傾向をまとめました ·{" "}
+                {formatGeneratedAt(insight.generatedAt)}
               </p>
             </>
           ) : (
@@ -67,7 +68,9 @@ export function InsightCard({
               <p className="text-[12.5px] leading-normal text-foreground lg:text-[13.5px]">
                 {hasLogs ? "まだまとめていません" : "この期間の記録がまだありません"}
               </p>
-              <p className="mt-0.75 text-[10px] text-muted-foreground">✨ AI が期間の傾向をまとめます</p>
+              <p className="mt-0.75 text-[10px] text-muted-foreground">
+                ✨ AI が期間の傾向をまとめます
+              </p>
             </>
           )}
         </div>
@@ -82,7 +85,9 @@ export function InsightCard({
         <Sparkles className="size-3.5" strokeWidth={1.8} />
         {isGenerating ? "まとめています…" : insight ? "もう一度まとめる" : "傾向をまとめる"}
       </button>
-      <p className="mt-1.5 text-center text-[10px] text-muted-foreground">{remainingUsesMessage(remaining)}</p>
+      <p className="mt-1.5 text-center text-[10px] text-muted-foreground">
+        {remainingUsesMessage(remaining)}
+      </p>
     </div>
   );
 }

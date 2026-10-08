@@ -19,7 +19,10 @@ export async function POST(request: Request) {
 
   if (error) {
     // メール未登録かパスワード不一致かは区別せず、常に同じメッセージを返す(アカウント存在の推測を防ぐ)
-    return NextResponse.json({ error: "メールアドレスまたはパスワードが正しくありません" }, { status: 401 });
+    return NextResponse.json(
+      { error: "メールアドレスまたはパスワードが正しくありません" },
+      { status: 401 },
+    );
   }
 
   // 初回ログイン時などまだ public.users に行が無ければ作る

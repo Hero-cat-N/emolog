@@ -57,7 +57,9 @@ function buildWeeks(year: number, month: number): Date[][] {
 export function LogsListHeader() {
   return (
     <div className="flex items-center justify-between">
-      <h1 className="font-heading text-[14.5px] font-bold text-foreground lg:text-[15px]">ログ一覧</h1>
+      <h1 className="font-heading text-[14.5px] font-bold text-foreground lg:text-[15px]">
+        ログ一覧
+      </h1>
       {/* 検索（形だけ・未実装） */}
       <span
         aria-label="検索"
@@ -94,7 +96,10 @@ export function LogsBrowser({
     : new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   const [mode, setMode] = useState<Mode>("day");
-  const [visible, setVisible] = useState({ year: initial.getFullYear(), month: initial.getMonth() });
+  const [visible, setVisible] = useState({
+    year: initial.getFullYear(),
+    month: initial.getMonth(),
+  });
   const [selected, setSelected] = useState(initial);
 
   // 日付キー → その日のログ配列
@@ -165,7 +170,9 @@ export function LogsBrowser({
                 onClick={() => setMode(m.value)}
                 className={cn(
                   "flex-1 rounded-lg px-0.5 py-1.75 text-[11.5px] transition-colors duration-150",
-                  mode === m.value ? "bg-card font-bold text-foreground shadow-card" : "text-muted-foreground",
+                  mode === m.value
+                    ? "bg-card font-bold text-foreground shadow-card"
+                    : "text-muted-foreground",
                 )}
               >
                 {m.label}
@@ -241,7 +248,8 @@ export function LogsBrowser({
                         !inMonth && "text-[#D8CDBD]",
                         dayEmotion && inMonth && "font-semibold",
                         isToday && !isSelected && "font-bold text-accent-foreground",
-                        isSelected && "bg-accent font-bold text-accent-foreground ring-[1.5px] ring-brand",
+                        isSelected &&
+                          "bg-accent font-bold text-accent-foreground ring-[1.5px] ring-brand",
                       )}
                     >
                       {day.getDate()}
@@ -341,7 +349,10 @@ function DayLogCard({ log, isOpen }: { log: LogView; isOpen: boolean }) {
       {log.tags.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1.5">
           {log.tags.map((name) => (
-            <span key={name} className="rounded-full bg-accent px-2.5 py-0.5 text-[11px] text-accent-foreground">
+            <span
+              key={name}
+              className="rounded-full bg-accent px-2.5 py-0.5 text-[11px] text-accent-foreground"
+            >
               {name}
             </span>
           ))}

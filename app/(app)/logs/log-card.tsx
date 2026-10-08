@@ -20,12 +20,7 @@ import { cn } from "@/lib/utils";
 
 // 純粋なヘルパー（LogView 型 / EMOTION_UI / formatLoggedDate 等）は log-card-utils.ts にある。
 // Server Component から使うものを "use client" のこのファイルに置くと呼び出せなくなるため分離した。
-import {
-  EMOTION_FALLBACK,
-  EMOTION_UI,
-  formatLoggedDate,
-  type LogView,
-} from "./log-card-utils";
+import { EMOTION_FALLBACK, EMOTION_UI, formatLoggedDate, type LogView } from "./log-card-utils";
 
 // ヘッダー右側の四角いアイコンボタン（34×34）
 const iconButton =
@@ -335,7 +330,9 @@ export function LogAiPanel({
                 </button>
                 {/* 下書きは分析結果も材料にするので、分析が済むまでは押せない */}
                 {!ai && (
-                  <p className="mt-1 text-[10.5px] text-muted-foreground">AI分析のあとで生成できます</p>
+                  <p className="mt-1 text-[10.5px] text-muted-foreground">
+                    AI分析のあとで生成できます
+                  </p>
                 )}
               </>
             )}
@@ -365,7 +362,11 @@ export function LogAiPanel({
       {/* アクション */}
       <div className="flex flex-col gap-2 px-5 py-4">
         <div className="grid grid-cols-2 gap-2">
-          <button type="button" onClick={handleShare} className={cn(outlineButton, "hover:bg-accent")}>
+          <button
+            type="button"
+            onClick={handleShare}
+            className={cn(outlineButton, "hover:bg-accent")}
+          >
             <Share2 className="size-4" strokeWidth={1.8} /> SNS にシェア
           </button>
           <button
@@ -411,11 +412,21 @@ function NeighborLink({ side, log }: { side: "older" | "newer"; log: LogView | n
   const emotion = (log.emotionCode && EMOTION_UI[log.emotionCode]) || EMOTION_FALLBACK;
 
   return (
-    <Link href={`/logs/${log.id}`} className={cn(base, "transition-colors duration-150 hover:bg-muted")}>
+    <Link
+      href={`/logs/${log.id}`}
+      className={cn(base, "transition-colors duration-150 hover:bg-muted")}
+    >
       <Chevron className="size-4 shrink-0 text-ink-soft" />
       <div className="min-w-0">
-        <p className="text-[10px] text-muted-foreground">{formatLoggedDate(log.loggedDate).short}</p>
-        <p className={cn("flex items-center gap-1 truncate text-xs text-foreground", isNewer && "justify-end")}>
+        <p className="text-[10px] text-muted-foreground">
+          {formatLoggedDate(log.loggedDate).short}
+        </p>
+        <p
+          className={cn(
+            "flex items-center gap-1 truncate text-xs text-foreground",
+            isNewer && "justify-end",
+          )}
+        >
           <emotion.icon className="size-3.5 shrink-0" style={{ color: emotion.color }} />
           {log.emotionLabel ?? "未設定"}
         </p>

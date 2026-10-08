@@ -17,7 +17,13 @@ export function SidebarNav() {
     <aside className="sticky top-0 hidden h-screen w-17 shrink-0 flex-col border-r border-line bg-card md:flex lg:w-59">
       {/* ロゴ。幅の狭いmdではアイコン単体、lgではワードマーク */}
       <Link href="/" className="flex justify-center px-3 pt-5.5 pb-4.5 lg:justify-start lg:px-5">
-        <Image src="/emolog-icon-light.svg" alt="エモログ" width={36} height={36} className="lg:hidden" />
+        <Image
+          src="/emolog-icon-light.svg"
+          alt="エモログ"
+          width={36}
+          height={36}
+          className="lg:hidden"
+        />
         <Image
           src="/emolog-wordmark.svg"
           alt="エモログ"

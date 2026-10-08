@@ -2,7 +2,12 @@
 
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import { EMOTION_FALLBACK, EMOTION_UI } from "../logs/log-card-utils";
 import type { ScorePoint } from "./score-series";
 
@@ -30,7 +35,13 @@ export function ScoreTrendChart({ points }: { points: ScorePoint[] }) {
           {/* 横のグリッド線だけ（#F0E7D8） */}
           <CartesianGrid vertical={false} stroke="var(--line)" />
           <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} minTickGap={16} />
-          <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} tickLine={false} axisLine={false} width={48} />
+          <YAxis
+            domain={[1, 5]}
+            ticks={[1, 2, 3, 4, 5]}
+            tickLine={false}
+            axisLine={false}
+            width={48}
+          />
           <ChartTooltip
             cursor={false}
             content={
@@ -56,7 +67,17 @@ export function ScoreTrendChart({ points }: { points: ScorePoint[] }) {
             // 点：その日の感情色で塗った丸（白いフチで線から浮かせる）
             dot={({ cx, cy, payload, index }) => {
               const color = (EMOTION_UI[payload.code] ?? EMOTION_FALLBACK).color;
-              return <circle key={index} cx={cx} cy={cy} r={4} fill={color} stroke="#FFFFFF" strokeWidth={1.5} />;
+              return (
+                <circle
+                  key={index}
+                  cx={cx}
+                  cy={cy}
+                  r={4}
+                  fill={color}
+                  stroke="#FFFFFF"
+                  strokeWidth={1.5}
+                />
+              );
             }}
             activeDot={{ r: 6 }}
           />

@@ -18,10 +18,10 @@ export const DEFAULT_PERIOD: PeriodDays = 30;
 // 例: "90" → 90 / undefined → 30 / "abc" → ? / "7" → ?
 export function parsePeriod(value: string | string[] | undefined): PeriodDays {
   const days = Number(value);
-  const found = PERIODS.find((p) => p.days === days) // PERIODS
+  const found = PERIODS.find((p) => p.days === days); // PERIODS
 
   // 見つかった
-  if(found) {
+  if (found) {
     return found.days;
   } else {
     return DEFAULT_PERIOD;

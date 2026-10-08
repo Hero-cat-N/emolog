@@ -31,18 +31,114 @@ type DemoLog = {
 // 14日前〜昨日の記録（今日は空けておき、ホームの「今日はまだ記録がありません」も見られるようにする）。
 // 4日前と11日前は記録なしにして、カレンダーの空き日・連続記録の途切れも確認できるようにしている
 const DEMO_LOGS: DemoLog[] = [
-  { daysAgo: 14, mood: "normal", tags: ["FF14", "日課"], didToday: "ルーレットと日課を消化した", goodThing: "初見さんがいるIDで丁寧に案内できた", badThing: null, tomorrowPlan: "零式の予習動画を見る" },
-  { daysAgo: 13, mood: "frustrate", tags: ["FF14", "零式"], didToday: "零式1層に野良で挑戦した", goodThing: "前半のギミックは安定してきた", badThing: "後半の範囲で自分のミスが続いてワイプ", tomorrowPlan: "苦手なギミックだけ練習する" },
-  { daysAgo: 12, mood: "fun", tags: ["FF14", "零式"], didToday: "零式1層をクリアした", goodThing: "昨日練習したところを一度もミスしなかった", badThing: null, tomorrowPlan: "2層の予習" },
-  { daysAgo: 10, mood: "sad", tags: ["FF14", "零式"], didToday: "2層に3時間通った", goodThing: "最後は初めて時間切れまで行けた", badThing: "解散続きで、まとまって練習できなかった", tomorrowPlan: "固定募集を探してみる" },
-  { daysAgo: 9, mood: "normal", tags: ["モンハン"], didToday: "気分転換にモンハンで素材集め", goodThing: "欲しかった素材が一発で出た", badThing: null, tomorrowPlan: "零式に戻る" },
-  { daysAgo: 8, mood: "frustrate", tags: ["FF14", "零式"], didToday: "2層の練習PTに参加した", goodThing: "同じところで詰まっている人と話せた", badThing: "途中で回線が落ちてPTに迷惑をかけた", tomorrowPlan: "ルーターを再起動しておく" },
-  { daysAgo: 7, mood: "fun", tags: ["FF14", "零式"], didToday: "零式2層をクリアした", goodThing: "練習PTのメンバーとそのままクリアできた", badThing: null, tomorrowPlan: "装備を整える" },
-  { daysAgo: 6, mood: "normal", tags: ["FF14", "日課"], didToday: "トークン集めと日課", goodThing: "新しい武器と交換できた", badThing: "ルーレットのマッチングが長かった", tomorrowPlan: "3層の予習" },
-  { daysAgo: 5, mood: "fun", tags: ["スプラ"], didToday: "友達とスプラでナワバリ", goodThing: "4連勝してみんなで盛り上がった", badThing: null, tomorrowPlan: "零式3層に挑戦" },
-  { daysAgo: 3, mood: "frustrate", tags: ["FF14", "零式"], didToday: "零式3層に初挑戦", goodThing: "前半は1回で覚えられた", badThing: "後半の処理が分からず、何度も床をなめた", tomorrowPlan: "攻略記事を読む" },
-  { daysAgo: 2, mood: "normal", tags: ["FF14", "零式"], didToday: "3層の練習を2時間", goodThing: "後半の処理の意味がやっと分かった", badThing: "集中が切れて最後はミスが増えた", tomorrowPlan: "短めに区切って練習する" },
-  { daysAgo: 1, mood: "fun", tags: ["FF14", "零式"], didToday: "零式3層を野良でクリアした", goodThing: "3回目でギミック処理が完璧に決まった", badThing: "途中でタンクが抜けて30分待った", tomorrowPlan: "4層の予習をする" },
+  {
+    daysAgo: 14,
+    mood: "normal",
+    tags: ["FF14", "日課"],
+    didToday: "ルーレットと日課を消化した",
+    goodThing: "初見さんがいるIDで丁寧に案内できた",
+    badThing: null,
+    tomorrowPlan: "零式の予習動画を見る",
+  },
+  {
+    daysAgo: 13,
+    mood: "frustrate",
+    tags: ["FF14", "零式"],
+    didToday: "零式1層に野良で挑戦した",
+    goodThing: "前半のギミックは安定してきた",
+    badThing: "後半の範囲で自分のミスが続いてワイプ",
+    tomorrowPlan: "苦手なギミックだけ練習する",
+  },
+  {
+    daysAgo: 12,
+    mood: "fun",
+    tags: ["FF14", "零式"],
+    didToday: "零式1層をクリアした",
+    goodThing: "昨日練習したところを一度もミスしなかった",
+    badThing: null,
+    tomorrowPlan: "2層の予習",
+  },
+  {
+    daysAgo: 10,
+    mood: "sad",
+    tags: ["FF14", "零式"],
+    didToday: "2層に3時間通った",
+    goodThing: "最後は初めて時間切れまで行けた",
+    badThing: "解散続きで、まとまって練習できなかった",
+    tomorrowPlan: "固定募集を探してみる",
+  },
+  {
+    daysAgo: 9,
+    mood: "normal",
+    tags: ["モンハン"],
+    didToday: "気分転換にモンハンで素材集め",
+    goodThing: "欲しかった素材が一発で出た",
+    badThing: null,
+    tomorrowPlan: "零式に戻る",
+  },
+  {
+    daysAgo: 8,
+    mood: "frustrate",
+    tags: ["FF14", "零式"],
+    didToday: "2層の練習PTに参加した",
+    goodThing: "同じところで詰まっている人と話せた",
+    badThing: "途中で回線が落ちてPTに迷惑をかけた",
+    tomorrowPlan: "ルーターを再起動しておく",
+  },
+  {
+    daysAgo: 7,
+    mood: "fun",
+    tags: ["FF14", "零式"],
+    didToday: "零式2層をクリアした",
+    goodThing: "練習PTのメンバーとそのままクリアできた",
+    badThing: null,
+    tomorrowPlan: "装備を整える",
+  },
+  {
+    daysAgo: 6,
+    mood: "normal",
+    tags: ["FF14", "日課"],
+    didToday: "トークン集めと日課",
+    goodThing: "新しい武器と交換できた",
+    badThing: "ルーレットのマッチングが長かった",
+    tomorrowPlan: "3層の予習",
+  },
+  {
+    daysAgo: 5,
+    mood: "fun",
+    tags: ["スプラ"],
+    didToday: "友達とスプラでナワバリ",
+    goodThing: "4連勝してみんなで盛り上がった",
+    badThing: null,
+    tomorrowPlan: "零式3層に挑戦",
+  },
+  {
+    daysAgo: 3,
+    mood: "frustrate",
+    tags: ["FF14", "零式"],
+    didToday: "零式3層に初挑戦",
+    goodThing: "前半は1回で覚えられた",
+    badThing: "後半の処理が分からず、何度も床をなめた",
+    tomorrowPlan: "攻略記事を読む",
+  },
+  {
+    daysAgo: 2,
+    mood: "normal",
+    tags: ["FF14", "零式"],
+    didToday: "3層の練習を2時間",
+    goodThing: "後半の処理の意味がやっと分かった",
+    badThing: "集中が切れて最後はミスが増えた",
+    tomorrowPlan: "短めに区切って練習する",
+  },
+  {
+    daysAgo: 1,
+    mood: "fun",
+    tags: ["FF14", "零式"],
+    didToday: "零式3層を野良でクリアした",
+    goodThing: "3回目でギミック処理が完璧に決まった",
+    badThing: "途中でタンクが抜けて30分待った",
+    tomorrowPlan: "4層の予習をする",
+  },
 ];
 
 async function findDemoUserId(): Promise<string> {
@@ -54,7 +150,9 @@ async function findDemoUserId(): Promise<string> {
     select id::text as id from auth.users where email = ${DEMO_EMAIL}
   `;
   if (rows.length === 0) {
-    throw new Error(`${DEMO_EMAIL} のユーザーが見つかりません。Supabase の管理画面で先に作成してください`);
+    throw new Error(
+      `${DEMO_EMAIL} のユーザーが見つかりません。Supabase の管理画面で先に作成してください`,
+    );
   }
   return rows[0].id;
 }
@@ -109,7 +207,9 @@ async function generateDemoAi(userId: string) {
   for (const log of recentLogs) {
     try {
       const analysis = await analyzeLog(toAnalyzeLogInput(log));
-      await prisma.aiSummary.create({ data: { logId: log.id, ...analysis, generatedAt: new Date() } });
+      await prisma.aiSummary.create({
+        data: { logId: log.id, ...analysis, generatedAt: new Date() },
+      });
       console.log(`  分析: ${log.loggedDate.toISOString().slice(0, 10)} ${analysis.summary}`);
     } catch (error) {
       console.warn(`  分析をスキップ: ${log.loggedDate.toISOString().slice(0, 10)}`, error);
@@ -118,7 +218,8 @@ async function generateDemoAi(userId: string) {
 
   // 一番新しいログにはブログ下書きも付けておく
   const latest = recentLogs[0];
-  const latestSummary = latest && (await prisma.aiSummary.findUnique({ where: { logId: latest.id } }));
+  const latestSummary =
+    latest && (await prisma.aiSummary.findUnique({ where: { logId: latest.id } }));
   if (latest && latestSummary) {
     try {
       const blogDraft = await generateBlogDraft(toAnalyzeLogInput(latest), latestSummary);
@@ -155,7 +256,9 @@ async function main() {
   console.log(`${DEMO_EMAIL} に ${DEMO_LOGS.length} 件の記録を入れました`);
 
   if (WITH_AI) {
-    console.log("AI 分析・ブログ下書き・インサイトを作成します（Gemini を呼ぶので少し時間がかかります）");
+    console.log(
+      "AI 分析・ブログ下書き・インサイトを作成します（Gemini を呼ぶので少し時間がかかります）",
+    );
     await generateDemoAi(userId);
   }
 }
