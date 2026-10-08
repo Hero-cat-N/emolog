@@ -17,8 +17,10 @@ datasource db {
 model User {
   id String @id @db.Uuid
 
-  logs Log[]
-  tags Tag[]
+  logs     Log[]
+  tags     Tag[]
+  aiUsages AiUsage[]
+  insights Insight[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -54,13 +56,67 @@ model Log {
   tomorrowPlan String   @map("tomorrow_plan")
   loggedDate   DateTime @map("logged_date") @db.Date
 
-  tags LogTag[]
+  tags      LogTag[]
+  aiSummary AiSummary?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([userId, loggedDate])
   @@map("logs")
+}
+
+// ログ1件ごとのAI分析結果（1対1）。行が無い = まだ分析していない。
+// ログ本体とは別テーブルにして、AIの出力でlogsテーブルを汚さない
+model AiSummary {
+  id    BigInt @id @default(autoincrement())
+  logId BigInt @unique @map("log_id")
+  log   Log    @relation(fields: [logId], references: [id], onDelete: Cascade)
+
+  keywords  String[] // 感情キーワード（Postgresの text[]）
+  summary   String // ひとこと要約
+  blogDraft String?  @map("blog_draft") // ブログ下書き。ボタンで生成するまでは null
+
+  // 分析した日時。log.updatedAt の方が新しければ「分析後にログが編集された = 結果が古い」と判定できる
+  generatedAt DateTime @map("generated_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("ai_summaries")
+}
+
+// AI生成(分析・ブログ下書き)を使った記録。1回成功するごとに1行増える。
+// Gemini の無料枠は APIキー全体で共有なので、1人が使い切らないよう「今日の行数」でユーザーごとに回数を制限する
+model AiUsage {
+  id     BigInt @id @default(autoincrement())
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind   String // "analyze" | "blog_draft"
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // 「このユーザーの今日の分」を数えるときの検索用
+  @@index([userId, createdAt])
+  @@map("ai_usages")
+}
+
+// 分析画面の「インサイト（AI）」。ユーザー × 期間(7/30/90日)ごとに最新の傾向文を1つだけ持つ。
+// 画面を開くたびに AI を呼ばないよう、作った結果をここに保存して使い回す
+model Insight {
+  id         BigInt @id @default(autoincrement())
+  userId     String @map("user_id") @db.Uuid
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  periodDays Int    @map("period_days") @db.SmallInt // 対象期間（今日を含む直近N日）
+  content    String // 傾向文
+
+  generatedAt DateTime @map("generated_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, periodDays])
+  @@map("insights")
 }
 
 // タグ（「FF14」「零式」など）。ユーザーごとに持ち、同じユーザー内では名前が重複しない

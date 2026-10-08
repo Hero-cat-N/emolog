@@ -15,7 +15,12 @@ export async function POST(request: Request) {
   const { email, password } = parsed.data;
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  // 確認メールのリンクを踏んだあとの戻り先。メールアドレスの確認はリンクを踏んだ時点で
+  // Supabase 側が済ませるので、ここではログインさせずに「登録完了」画面を見せるだけにする。
+  // 指定しないと Site URL(/) に戻され、未ログイン扱いでいきなりログイン画面へ飛ばされる
+  const { origin } = new URL(request.url);
+  const emailRedirectTo = `${origin}/signup/complete`;
+  const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo } });
 
   if (error || !data.user) {
     // メール重複かパスワード不備かは区別せず、常に同じメッセージを返す(アカウント存在の推測を防ぐ)

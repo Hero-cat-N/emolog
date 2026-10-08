@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AlignLeft, ChartNoAxesColumn, ChevronRight, Flame, PenLine, Sparkles } from "lucide-react";
 
+import { formatGeneratedAt } from "@/lib/ai/messages";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { startOfUTCDay } from "@/lib/date";
@@ -33,7 +34,7 @@ export default async function DashboardPage() {
   // Googleログインだと user_metadata に表示名が入っている。無ければ名前なしの挨拶にする
   const displayName: string | undefined = user.user_metadata?.full_name ?? user.user_metadata?.name;
 
-  const [todayLog, monthCount, recentLog, allDates] = await Promise.all([
+  const [todayLog, monthCount, recentLog, allDates, latestInsight] = await Promise.all([
     prisma.log.findUnique({ where: { userId_loggedDate: { userId, loggedDate: today } } }),
     prisma.log.count({ where: { userId, loggedDate: { gte: startOfUTCMonth(today) } } }),
     prisma.log.findFirst({
@@ -45,6 +46,13 @@ export default async function DashboardPage() {
       where: { userId },
       select: { loggedDate: true },
       orderBy: { loggedDate: "desc" },
+    }),
+    // 分析画面で作った AI インサイトのうち、いちばん新しく作ったもの（期間は問わない）。
+    // ホームでは AI を呼ばず、保存済みのものを見せるだけにする（無料枠・1日の回数を使わない）
+    prisma.insight.findFirst({
+      where: { userId },
+      orderBy: { generatedAt: "desc" },
+      select: { content: true, periodDays: true, generatedAt: true },
     }),
   ]);
 
@@ -109,21 +117,28 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* AI傾向（プレースホルダー：生成処理は未実装）。AI由来は ✨ + accent 配色 */}
+          {/* AI傾向：分析画面で作った最新のインサイトを出す。AI由来は ✨ + accent 配色 */}
           <div className="flex gap-2.5 rounded-[14px] border border-accent-border bg-accent p-3.25 lg:gap-3 lg:rounded-2xl lg:px-5 lg:py-4.5">
             <Sparkles className="mt-0.5 size-4 shrink-0 text-accent-foreground lg:size-4.5" strokeWidth={1.8} />
-            <div>
-              <span className="inline-block rounded-full border border-[#F0C7B4] bg-card px-2 py-0.5 text-[9.5px] font-bold text-accent-foreground lg:text-[10px]">
-                ✨ AI
-              </span>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="inline-block rounded-full border border-[#F0C7B4] bg-card px-2 py-0.5 text-[9.5px] font-bold text-accent-foreground lg:text-[10px]">
+                  ✨ AI
+                </span>
+                {latestInsight && (
+                  <span className="text-[10px] text-muted-foreground lg:text-[11px]">
+                    直近{latestInsight.periodDays}日間 · {formatGeneratedAt(latestInsight.generatedAt)}
+                  </span>
+                )}
+              </div>
               <p className="mt-1.5 text-[13px] leading-relaxed text-foreground lg:text-[14.5px] lg:leading-[1.7]">
-                まだ分析されていません
+                {latestInsight?.content ?? "まだ分析されていません"}
               </p>
               <Link
                 href="/analytics"
                 className="mt-1.5 inline-block text-[11.5px] font-semibold text-accent-foreground hover:underline lg:mt-2 lg:text-[12.5px]"
               >
-                詳しい分析を見る →
+                {latestInsight ? "詳しい分析を見る →" : "分析画面で傾向をまとめる →"}
               </Link>
             </div>
           </div>
@@ -190,11 +205,15 @@ export default async function DashboardPage() {
                 <ChartNoAxesColumn className={quickIcon} strokeWidth={1.8} />
                 分析を見る
               </Link>
-              {/* 下書き生成はAI機能の実装待ち */}
-              <span className={cn(quickAction, "opacity-50")}>
+              {/* ブログ下書きはログ詳細のAI列で作るので、今日のログの詳細へ。
+                  今日まだ記録していなければ下書きの材料が無いので、先に記録画面へ */}
+              <Link
+                href={todayLog ? `/logs/${todayLog.id}` : "/post"}
+                className={cn(quickAction, "hover:bg-accent")}
+              >
                 <PenLine className={quickIcon} strokeWidth={1.8} />
                 下書き生成
-              </span>
+              </Link>
             </div>
           </section>
         </div>

@@ -1,10 +1,11 @@
 import { notFound, redirect } from "next/navigation";
 
+import { getRemainingAiUses } from "@/lib/ai/usage";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "../../_components/app-shell";
 import { LogDetailHeader } from "../log-card";
-import { parseId, type LogView } from "../log-card-utils";
+import { parseId, toLogAiView, type LogView } from "../log-card-utils";
 import { LogsBrowser } from "../logs-browser";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +31,7 @@ export default async function LogDetailPage(props: PageProps<"/logs/[id]">) {
     where: { userId: user.id },
     orderBy: [{ loggedDate: "asc" }, { id: "asc" }],
     // タグは中間テーブル(log_tags)越しなので、その先の tag まで include する
-    include: { emotion: true, tags: { include: { tag: true } } },
+    include: { emotion: true, tags: { include: { tag: true } }, aiSummary: true },
   });
 
   const views: LogView[] = logs.map((log) => ({
@@ -43,16 +44,19 @@ export default async function LogDetailPage(props: PageProps<"/logs/[id]">) {
     badThing: log.badThing,
     tomorrowPlan: log.tomorrowPlan,
     tags: log.tags.map((logTag) => logTag.tag.name),
+    ai: toLogAiView(log.aiSummary, log.updatedAt),
   }));
 
   const current = views.find((log) => log.id === currentId.toString());
   if (!current) notFound();
 
+  const aiRemaining = await getRemainingAiUses(user.id);
+
   return (
     <AppShell header={<LogDetailHeader log={current} />} paneLayout>
       {/* key: 前日/翌日で別IDに移ったとき、選択日などの state を作り直させる
           （同じページ間の移動だと Next.js はコンポーネントを使い回すため） */}
-      <LogsBrowser key={current.id} logs={views} currentId={current.id} />
+      <LogsBrowser key={current.id} logs={views} currentId={current.id} aiRemaining={aiRemaining} />
     </AppShell>
   );
 }

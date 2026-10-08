@@ -1,9 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Copy, Ellipsis, Share2, SquarePen, Trash2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Ellipsis,
+  Share2,
+  Sparkles,
+  SquarePen,
+  Trash2,
+} from "lucide-react";
+import { toast } from "sonner";
 
+import { formatGeneratedAt, readAiErrorMessage, remainingUsesMessage } from "@/lib/ai/messages";
 import { cn } from "@/lib/utils";
 
 // 純粋なヘルパー（LogView 型 / EMOTION_UI / formatLoggedDate 等）は log-card-utils.ts にある。
@@ -12,6 +24,7 @@ import {
   EMOTION_FALLBACK,
   EMOTION_UI,
   formatLoggedDate,
+  type LogAiView,
   type LogView,
 } from "./log-card-utils";
 
@@ -53,10 +66,12 @@ export function LogDetailBody({
   log,
   older,
   newer,
+  aiRemaining,
 }: {
   log: LogView;
   older: LogView | null;
   newer: LogView | null;
+  aiRemaining: number;
 }) {
   return (
     <div className="grid flex-1 bg-card lg:grid-cols-[minmax(0,1fr)_300px] lg:grid-rows-[1fr_auto]">
@@ -86,7 +101,7 @@ export function LogDetailBody({
       </div>
 
       <aside className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
-        <LogAiPanel logId={log.id} />
+        <LogAiPanel logId={log.id} ai={log.ai} remaining={aiRemaining} />
       </aside>
 
       {/* 前日 / 翌日 */}
@@ -136,9 +151,68 @@ function LogSection({ label, value }: { label: string; value?: string | null }) 
 }
 
 // ── AI列（AI分析 + アクション） ──
-// note: いまは中身が全ログ共通のプレースホルダー。AI分析に実データを入れる段階で log を受け取る想定
-export function LogAiPanel({ logId }: { logId: string }) {
+export function LogAiPanel({
+  logId,
+  ai,
+  remaining,
+}: {
+  logId: string;
+  ai: LogAiView | null;
+  // 今日あと何回AI生成できるか（分析・ブログ下書きの合計）
+  remaining: number;
+}) {
   const router = useRouter();
+  // 無料枠のAIは返事に数秒〜十数秒かかるので、その間はボタンを止めて二重送信を防ぐ
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isGeneratingBlog, setIsGeneratingBlog] = useState(false);
+  // 無料枠の回数を無駄にしないよう、どちらかの生成中はもう片方も押せないようにする。
+  // 今日の回数を使い切っていたら、サーバーで断られるので最初から押せないようにする
+  const isBusy = isAnalyzing || isGeneratingBlog || remaining <= 0;
+
+  async function handleGenerateBlog() {
+    setIsGeneratingBlog(true);
+    try {
+      const res = await fetch(`/api/logs/${logId}/blog-draft`, { method: "POST" });
+      if (!res.ok) {
+        toast.error(await readAiErrorMessage(res, "下書きの生成に失敗しました"));
+        return;
+      }
+      toast.success("ブログ下書きを生成しました");
+      router.refresh();
+    } catch {
+      toast.error("通信に失敗しました");
+    } finally {
+      setIsGeneratingBlog(false);
+    }
+  }
+
+  async function handleCopyBlog(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("下書きをコピーしました");
+    } catch {
+      toast.error("コピーできませんでした");
+    }
+  }
+
+  async function handleAnalyze() {
+    setIsAnalyzing(true);
+    try {
+      const res = await fetch(`/api/logs/${logId}/analyze`, { method: "POST" });
+      if (!res.ok) {
+        toast.error(await readAiErrorMessage(res));
+        return;
+      }
+      toast.success("AI分析が完了しました");
+      // 保存された結果をサーバーから読み直して表示に反映する
+      router.refresh();
+    } catch {
+      toast.error("通信に失敗しました");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }
+
   async function handleDelete() {
     if (!confirm("このログを削除しますか?")) return;
     await fetch(`/api/logs/${logId}`, { method: "DELETE" });
@@ -150,32 +224,109 @@ export function LogAiPanel({ logId }: { logId: string }) {
 
   return (
     <div>
-      {/* AI分析（プレースホルダー：生成処理は未実装）。
-          AI由来ブロックは常に accent 配色 + ✨ でラベリングする（design.md 6節） */}
+      {/* AI分析。AI由来ブロックは常に accent 配色 + ✨ でラベリングする（design.md 6節） */}
       <div className="border-b border-line bg-accent px-5 py-4.5">
         <div className="mb-3 flex items-center gap-1.75">
           <span className="text-[13px] font-bold text-foreground">✨ AI 分析</span>
           <span className="rounded-full border border-[#F0C7B4] bg-card px-2 py-0.5 text-[9.5px] font-semibold text-accent-foreground">
             自動生成
           </span>
+          {ai && (
+            <span className="ml-auto text-[10px] text-muted-foreground">
+              {formatGeneratedAt(ai.generatedAt)}
+            </span>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
           <div className="rounded-[10px] bg-card px-3.25 py-2.75">
             <p className="mb-1.5 text-[10px] text-muted-foreground">感情キーワード</p>
-            <p className="text-xs text-muted-foreground">まだ分析されていません</p>
+            {ai ? (
+              <div className="flex flex-wrap gap-1.5">
+                {ai.keywords.map((keyword) => (
+                  <span
+                    key={keyword}
+                    className="rounded-full bg-accent px-2.5 py-0.5 text-[11px] text-accent-foreground"
+                  >
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">まだ分析されていません</p>
+            )}
           </div>
           <div className="rounded-[10px] bg-card px-3.25 py-2.75">
             <p className="mb-1.25 text-[10px] text-muted-foreground">ひとこと要約</p>
-            <p className="text-xs text-muted-foreground">まだ生成されていません</p>
+            {ai ? (
+              <p className="text-[12.5px] leading-[1.7] text-foreground">{ai.summary}</p>
+            ) : (
+              <p className="text-xs text-muted-foreground">まだ生成されていません</p>
+            )}
           </div>
           <div className="rounded-[10px] bg-card px-3.25 py-2.75">
             <p className="mb-1.25 text-[10px] text-muted-foreground">ブログ下書き</p>
-            <p className="text-[12.5px] font-medium text-accent-foreground opacity-60">
-              このログからブログ下書きを生成する →
-            </p>
+            {ai?.blogDraft ? (
+              <>
+                {/* 1行目がタイトル、以降が本文。改行をそのまま見せる */}
+                <p className="max-h-60 overflow-y-auto text-[12.5px] leading-[1.8] whitespace-pre-wrap text-foreground">
+                  {ai.blogDraft}
+                </p>
+                <div className="mt-2 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleCopyBlog(ai.blogDraft!)}
+                    className="flex items-center gap-1 text-[11.5px] font-medium text-accent-foreground"
+                  >
+                    <Copy className="size-3.5" strokeWidth={1.8} /> コピー
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleGenerateBlog}
+                    disabled={isBusy}
+                    className="text-[11.5px] text-muted-foreground disabled:opacity-60"
+                  >
+                    {isGeneratingBlog ? "生成中…" : "作り直す"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={handleGenerateBlog}
+                  disabled={!ai || isBusy}
+                  className="text-left text-[12.5px] font-medium text-accent-foreground disabled:opacity-60"
+                >
+                  {isGeneratingBlog ? "生成中…" : "このログからブログ下書きを生成する →"}
+                </button>
+                {/* 下書きは分析結果も材料にするので、分析が済むまでは押せない */}
+                {!ai && (
+                  <p className="mt-1 text-[10.5px] text-muted-foreground">AI分析のあとで生成できます</p>
+                )}
+              </>
+            )}
           </div>
         </div>
+
+        {/* 分析後にログを編集していたら、結果が古いことを知らせて再分析を促す */}
+        {ai?.isStale && (
+          <p className="mt-2.5 text-[10.5px] text-accent-foreground">
+            分析したあとにログが編集されています
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={handleAnalyze}
+          disabled={isBusy}
+          className="mt-2.5 flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-[#F0C7B4] bg-card text-[12.5px] font-medium text-accent-foreground transition-colors duration-150 hover:bg-[#FDF6F2] disabled:opacity-60"
+        >
+          <Sparkles className="size-4" strokeWidth={1.8} />
+          {isAnalyzing ? "分析中…" : ai ? "もう一度分析する" : "AIで分析する"}
+        </button>
+        <p className="mt-1.5 text-center text-[10.5px] text-muted-foreground">
+          {remainingUsesMessage(remaining)}
+        </p>
       </div>
 
       {/* アクション（シェア・コピーは未実装） */}
