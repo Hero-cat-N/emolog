@@ -131,10 +131,12 @@ export function LogsBrowser({
       return { year: d.getFullYear(), month: d.getMonth() };
     });
 
+  // 記録が無い日の「追加する」ボタン。ホームの「今日はまだ記録がありません」と同じく発光させて気づかせる
+  // (animate-glow は globals.css。動きを減らす設定の端末では止まる)
   const addLink = (
     <Link
       href={`/post?date=${selectedDateParam}`}
-      className="flex items-center justify-center rounded-xl border border-dashed border-border px-4 py-4 text-[13px] text-muted-foreground transition-colors duration-150 hover:bg-card hover:text-foreground"
+      className="flex animate-glow items-center justify-center rounded-xl border border-primary bg-card px-4 py-4 text-[13px] font-semibold text-accent-foreground transition-colors duration-150 hover:bg-accent"
     >
       この日の記録を追加する
     </Link>
