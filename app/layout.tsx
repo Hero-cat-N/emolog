@@ -34,11 +34,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
+    // ブラウザ拡張機能が <html>・<body> に属性を足すと hydration の警告が出るため、この2要素の属性の差だけ無視する。
+    // 効くのはこの要素自身の属性だけで、子要素のずれは引き続き検出される
     <html
       lang="ja"
       className={`${mplusRounded.variable} ${notoSansJP.variable} ${quicksand.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}
         {/* toast の表示場所。layout に置くので、画面遷移しても通知が消えない。
             アプリはライトテーマのみなので light に固定（OS がダークでも黒くしない） */}
