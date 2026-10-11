@@ -241,8 +241,18 @@ export function LogAiPanel({
 
   async function handleDelete() {
     if (!confirm("このログを削除しますか?")) return;
-    await fetch(`/api/logs/${logId}`, { method: "DELETE" });
-    router.push("/logs");
+    try {
+      const res = await fetch(`/api/logs/${logId}`, { method: "DELETE" });
+
+      if (!res.ok) {
+        toast.error("ログの削除に失敗しました");
+        return;
+      }
+      toast.success("ログを削除しました");
+      router.push("/logs");
+    } catch {
+      toast.error("通信に失敗しました");
+    }
   }
 
   const outlineButton =
