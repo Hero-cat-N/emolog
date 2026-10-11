@@ -191,7 +191,8 @@ erDiagram
 # 1. 依存パッケージのインストール（postinstall で prisma generate も実行されます）
 npm install
 
-# 2. 環境変数の設定（.env.local を作成）
+# 2. 環境変数の設定（.env.example をコピーして .env.local を作り、値を入れる）
+cp .env.example .env.local
 #   DATABASE_URL                          Supabase の接続文字列（pooler・ポート6543）
 #   DIRECT_URL                            Supabase の接続文字列（直接接続・ポート5432。マイグレーション用）
 #   SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY
