@@ -70,8 +70,6 @@ export const EMOTION_UI: Record<string, { icon: LucideIcon; tint: string; color:
   normal: { icon: Meh, tint: "#EFEBE4", color: "var(--emotion-neutral)" },
   sad: { icon: Frown, tint: "#E6ECF7", color: "var(--emotion-sad)" },
   frustrate: { icon: Angry, tint: "#FBEEE7", color: "var(--emotion-angry)" },
-  // lucideに「疲れ」にぴったりの表情アイコンが無いため、一旦 Meh を流用
-  tired: { icon: Meh, tint: "#EEEAF6", color: "var(--emotion-tired)" },
 };
 export const EMOTION_FALLBACK = { icon: Meh, tint: "#EFEBE4", color: "var(--emotion-neutral)" };
 

@@ -145,7 +145,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
                   </Button>
                   <div className="flex items-center gap-2 py-2 w-full">
                     <div className="flex h-px bg-gray-300 flex-1"></div>
-                    <span className="flex text-">または</span>
+                    <span className="text-sm text-muted-foreground">または</span>
                     <div className="flex h-px bg-gray-300 flex-1"></div>
                   </div>
                   <Button
@@ -154,7 +154,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
                     type="button"
                     onClick={handleGoogleSignup}
                   >
-                    Google で 登録
+                    Google で登録
                   </Button>
                   <FieldDescription className="text-center">
                     すでにアカウントをお持ちの方は{" "}

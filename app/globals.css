@@ -15,7 +15,6 @@
   --color-emotion-neutral: var(--emotion-neutral);
   --color-emotion-sad: var(--emotion-sad);
   --color-emotion-angry: var(--emotion-angry);
-  --color-emotion-tired: var(--emotion-tired);
   --color-brand: var(--brand);
   --color-brand-deep: var(--brand-deep);
   --color-brand-light: var(--brand-light);
@@ -89,7 +88,6 @@
   --emotion-neutral: #8f8578;
   --emotion-sad: #5b7fc7;
   --emotion-angry: #d85528;
-  --emotion-tired: #8b78c8;
   --brand: #d85528;
   --brand-deep: #c74c1b;
   --brand-light: #e3673b;
