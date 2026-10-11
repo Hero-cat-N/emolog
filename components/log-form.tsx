@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Badge } from "@/components/ui/badge";
@@ -51,8 +51,13 @@ export function LogForm({
     defaultValues,
   });
 
-  const values = form.watch();
-  const charCount = (values.today?.length ?? 0) + (values.good?.length ?? 0) + (values.bad?.length ?? 0) + (values.tomorrow?.length ?? 0);
+  // 文字数カウント用に入力中の値を購読する（form.watch() は React Compiler と相性が悪いので useWatch を使う）
+  const values = useWatch({ control: form.control });
+  const charCount =
+    (values.today?.length ?? 0) +
+    (values.good?.length ?? 0) +
+    (values.bad?.length ?? 0) +
+    (values.tomorrow?.length ?? 0);
 
   return (
     // PC ではモーダル相当の幅（720px）に収め、4項目を2×2に並べて縦スクロールを減らす
@@ -101,7 +106,12 @@ export function LogForm({
             明日やること
             <Badge className="bg-accent text-accent-foreground">必須</Badge>
           </FieldLabel>
-          <Input {...form.register("tomorrow")} id="tomorrow" type="text" placeholder="明日やること" />
+          <Input
+            {...form.register("tomorrow")}
+            id="tomorrow"
+            type="text"
+            placeholder="明日やること"
+          />
           <FieldError errors={[form.formState.errors.tomorrow]} />
         </Field>
       </div>
@@ -132,7 +142,13 @@ export function LogForm({
           control={form.control}
           name="mood"
           render={({ field }) => (
-            <ToggleGroup className="w-full justify-between gap-2" variant="outline" spacing={2} value={[field.value]} onValueChange={(val) => field.onChange(val[0])}>
+            <ToggleGroup
+              className="w-full justify-between gap-2"
+              variant="outline"
+              spacing={2}
+              value={[field.value]}
+              onValueChange={(val) => field.onChange(val[0])}
+            >
               {MOODS.map((mood) => (
                 // 感情ごとの色は EMOTION_UI（アプリ全体で共通）から取り、CSS変数で渡す。
                 // 選択中は「感情色の1.5px枠 + ティント背景」（Handoff 1d）
@@ -148,7 +164,11 @@ export function LogForm({
                   }
                   className="flex h-auto flex-1 flex-col gap-1 rounded-xl py-3 aria-pressed:border-[1.5px] aria-pressed:border-(--mood) aria-pressed:bg-(--mood-tint) aria-pressed:font-bold aria-pressed:text-foreground"
                 >
-                  <mood.icon className="size-6" strokeWidth={1.8} style={{ color: EMOTION_UI[mood.value].color }} />
+                  <mood.icon
+                    className="size-6"
+                    strokeWidth={1.8}
+                    style={{ color: EMOTION_UI[mood.value].color }}
+                  />
                   <span className="text-xs">{mood.label}</span>
                 </ToggleGroupItem>
               ))}
@@ -159,16 +179,25 @@ export function LogForm({
 
       <Separator className="my-5" />
 
-      {form.formState.errors.root?.message && <p className="mb-3 text-sm text-destructive">{form.formState.errors.root.message}</p>}
+      {form.formState.errors.root?.message && (
+        <p className="mb-3 text-sm text-destructive">{form.formState.errors.root.message}</p>
+      )}
 
       <div className="flex items-center justify-between">
         {cancelHref && (
-          <Link href={cancelHref} className="flex justify-center items-center rounded-xl border border-border bg-card px-4 w-32 h-12 shadow-sm transition-colors hover:bg-muted">
+          <Link
+            href={cancelHref}
+            className="flex justify-center items-center rounded-xl border border-border bg-card px-4 w-32 h-12 shadow-sm transition-colors hover:bg-muted"
+          >
             一覧に戻る
           </Link>
         )}
         <span className="text-sm text-muted-foreground">{charCount}文字</span>
-        <Button type="submit" className="h-12 rounded-xl px-8 text-base" disabled={form.formState.isSubmitting}>
+        <Button
+          type="submit"
+          className="h-12 rounded-xl px-8 text-base"
+          disabled={form.formState.isSubmitting}
+        >
           {form.formState.isSubmitting ? submittingLabel : submitLabel}
         </Button>
       </div>

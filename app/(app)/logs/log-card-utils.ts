@@ -43,7 +43,12 @@ export type LogAiView = {
 
 // Prisma の AiSummary（include したもの）を画面用の形にする。2つのページで同じ変換をするのでここに置く
 export function toLogAiView(
-  aiSummary: { keywords: string[]; summary: string; blogDraft: string | null; generatedAt: Date } | null,
+  aiSummary: {
+    keywords: string[];
+    summary: string;
+    blogDraft: string | null;
+    generatedAt: Date;
+  } | null,
   logUpdatedAt: Date,
 ): LogAiView | null {
   if (!aiSummary) return null;

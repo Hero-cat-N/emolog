@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
@@ -28,18 +28,13 @@ export function PostForm({ tagOptions }: { tagOptions: string[] }) {
   const targetDate = useMemo(() => parseDateParam(searchParams.get("date")), [searchParams]);
   const isBackfill = targetDate !== null;
 
-  // ヘッダーの日付。SSR とクライアントで差が出ないよう mount 後にセットする（今日の場合のみ）
-  const [dateLabel, setDateLabel] = useState("");
-  useEffect(() => {
-    if (isBackfill) return;
-    setDateLabel(
-      new Intl.DateTimeFormat("ja-JP", {
-        month: "numeric",
-        day: "numeric",
-        weekday: "short",
-      }).format(new Date())
-    );
-  }, [isBackfill]);
+  // ヘッダーの今日の日付。サーバー(UTC)とブラウザ(JST)で日付がずれないよう、タイムゾーンを日本に固定する
+  const dateLabel = new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    month: "numeric",
+    day: "numeric",
+    weekday: "short",
+  }).format(new Date());
 
   const backfillLabel = targetDate
     ? `${targetDate.getUTCMonth() + 1}/${targetDate.getUTCDate()}（${WEEKDAYS[targetDate.getUTCDay()]}）`

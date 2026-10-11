@@ -1,0 +1,10 @@
+# 自動生成・外部由来のファイルは整形しない
+node_modules
+.next
+lib/generated
+prisma/migrations
+package-lock.json
+next-env.d.ts
+design_handoff_emolog
+# ドキュメントは表のレイアウトを手で整えているので対象外
+*.md

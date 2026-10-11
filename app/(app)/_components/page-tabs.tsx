@@ -19,7 +19,10 @@ export function PageTabs() {
 
         if (tab.disabled) {
           return (
-            <span key={tab.href} className={cn(base, "border-transparent text-muted-foreground/50")}>
+            <span
+              key={tab.href}
+              className={cn(base, "border-transparent text-muted-foreground/50")}
+            >
               {tab.label}
             </span>
           );

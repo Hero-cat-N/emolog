@@ -21,7 +21,10 @@ const DEFAULT_TIMEOUT_MS = 25_000;
 // プロンプトを送って、返ってきたテキストを返す。空の返事は例外にする
 export async function generateText(
   prompt: string,
-  { config, timeoutMs = DEFAULT_TIMEOUT_MS }: { config?: GenerateContentConfig; timeoutMs?: number } = {},
+  {
+    config,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+  }: { config?: GenerateContentConfig; timeoutMs?: number } = {},
 ): Promise<string> {
   for (let attempt = 1; ; attempt++) {
     try {

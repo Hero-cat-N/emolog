@@ -81,7 +81,10 @@ export function TagPicker({
         <button
           type="button"
           onClick={() => setAdding(true)}
-          className={cn(chip, "border border-dashed border-[#D8CDBD] bg-card text-muted-foreground hover:bg-accent")}
+          className={cn(
+            chip,
+            "border border-dashed border-[#D8CDBD] bg-card text-muted-foreground hover:bg-accent",
+          )}
         >
           ＋追加
         </button>

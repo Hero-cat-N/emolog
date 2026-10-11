@@ -33,7 +33,13 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
   }
 
   return (
-    <div className={cn("flex flex-col gap-6 md:grid md:grid-cols-2 md:items-center md:gap-16", className)} {...props}>
+    <div
+      className={cn(
+        "flex flex-col gap-6 md:grid md:grid-cols-2 md:items-center md:gap-16",
+        className,
+      )}
+      {...props}
+    >
       {/* PC版のみ表示するブランディングパネル */}
       <div className="hidden md:flex md:flex-col md:gap-4">
         <div className="flex items-center gap-3">
@@ -46,7 +52,9 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
           </div>
         </div>
         <p className="text-lg font-medium">今日のプレイを、3秒で記録する。</p>
-        <p className="text-sm text-muted-foreground leading-relaxed">やったこと・良かったこと・モヤったこと・明日やること。4項目を書くだけで、AIが気分の傾向をまとめます。</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          やったこと・良かったこと・モヤったこと・明日やること。4項目を書くだけで、AIが気分の傾向をまとめます。
+        </p>
       </div>
 
       <Card className="ring-0 shadow-none md:ring-1 md:ring-foreground/10 md:shadow-sm">
@@ -98,21 +106,39 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
               <FieldGroup>
                 <Field>
                   <FieldLabel htmlFor="email">メールアドレス</FieldLabel>
-                  <Input {...form.register("email")} className="p-4 py-6" id="email" type="email" placeholder="you@example.com" />
+                  <Input
+                    {...form.register("email")}
+                    className="p-4 py-6"
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                  />
                   {form.formState.errors.email && (
-                    <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.email.message}
+                    </p>
                   )}
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="password">パスワード</FieldLabel>
-                  <Input {...form.register("password")} className="p-4 py-6" id="password" type="password" placeholder="●●●●●●" />
+                  <Input
+                    {...form.register("password")}
+                    className="p-4 py-6"
+                    id="password"
+                    type="password"
+                    placeholder="●●●●●●"
+                  />
                   {form.formState.errors.password && (
-                    <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.password.message}
+                    </p>
                   )}
                 </Field>
                 <Field>
                   {form.formState.errors.root?.message && (
-                    <p className="text-sm text-destructive text-center">{form.formState.errors.root.message}</p>
+                    <p className="text-sm text-destructive text-center">
+                      {form.formState.errors.root.message}
+                    </p>
                   )}
                   <Button className="py-6" type="submit" disabled={form.formState.isSubmitting}>
                     {form.formState.isSubmitting ? "登録中…" : "登録する"}
@@ -122,7 +148,12 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
                     <span className="flex text-">または</span>
                     <div className="flex h-px bg-gray-300 flex-1"></div>
                   </div>
-                  <Button className="py-6" variant="outline" type="button" onClick={handleGoogleSignup}>
+                  <Button
+                    className="py-6"
+                    variant="outline"
+                    type="button"
+                    onClick={handleGoogleSignup}
+                  >
                     Google で 登録
                   </Button>
                   <FieldDescription className="text-center">

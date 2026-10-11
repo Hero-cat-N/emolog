@@ -8,7 +8,7 @@ import { EMOTION_FALLBACK, EMOTION_UI } from "../logs/log-card-utils";
 import { calculateStreak } from "../streak";
 import { countByEmotion } from "./count-by-emotion";
 import { EmotionBreakdown } from "./emotion-breakdown";
-import { ComingSoon } from "./panel";
+import { cn } from "@/lib/utils";
 import { InsightCard } from "./insight-card";
 import { getPeriodStart, parsePeriod } from "./period";
 import { PeriodTabs } from "./period-tabs";
@@ -17,8 +17,8 @@ import { ScoreTrendChart } from "./score-trend-chart";
 
 export const dynamic = "force-dynamic";
 
-export default async function AnalyticsPage({ // awaitを案つよ
-  searchParams, 
+export default async function AnalyticsPage({
+  searchParams,
 }: {
   // Next 16 では searchParams は Promise（await してから読む）
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -41,7 +41,11 @@ export default async function AnalyticsPage({ // awaitを案つよ
     // 期間内のログ（感情の内訳・記録日数・スコア推移に使う）。推移グラフのため古い順に並べる
     prisma.log.findMany({
       where: { userId, loggedDate: { gte: periodStart } },
-      select: { loggedDate: true, emotion: { select: { code: true, label: true } } },
+      select: {
+        loggedDate: true,
+        emotion: { select: { code: true, label: true } },
+        tags: { select: { tag: { select: { name: true } } } },
+      },
       orderBy: { loggedDate: "asc" },
     }),
     // 連続記録は期間に関係なく「今日から遡って」数えるので全件の日付が要る
@@ -73,6 +77,13 @@ export default async function AnalyticsPage({ // awaitを案つよ
   );
   const streak = calculateStreak(allDates.map((d) => d.loggedDate));
 
+  // よく遊んだコンテンツ：期間内に付けたタグの回数の多い順（上位6つ）
+  const tagCounts = new Map<string, number>();
+  for (const log of periodLogs) {
+    for (const { tag } of log.tags) tagCounts.set(tag.name, (tagCounts.get(tag.name) ?? 0) + 1);
+  }
+  const topTags = [...tagCounts].sort((a, b) => b[1] - a[1]).slice(0, 6);
+
   // 件数の多い順に並んでいるので、先頭が「多い感情」
   const topEmotion = counts[0];
   const topEmotionUI = (topEmotion && EMOTION_UI[topEmotion.code]) || EMOTION_FALLBACK;
@@ -89,7 +100,9 @@ export default async function AnalyticsPage({ // awaitを案つよ
       header={
         <div className="flex items-center justify-between">
           <PageHeading>感情ログ</PageHeading>
-          <span className="text-[11.5px] text-muted-foreground lg:text-[12.5px]">直近{periodDays}日間</span>
+          <span className="text-[11.5px] text-muted-foreground lg:text-[12.5px]">
+            直近{periodDays}日間
+          </span>
         </div>
       }
     >
@@ -104,7 +117,10 @@ export default async function AnalyticsPage({ // awaitを案つよ
           </div>
           <div className={metricCard}>
             {topEmotion ? (
-              <topEmotionUI.icon className="size-6 lg:size-8" style={{ color: topEmotionUI.color }} />
+              <topEmotionUI.icon
+                className="size-6 lg:size-8"
+                style={{ color: topEmotionUI.color }}
+              />
             ) : (
               <span className={metricValue}>—</span>
             )}
@@ -135,8 +151,29 @@ export default async function AnalyticsPage({ // awaitを案つよ
           <div className="flex flex-col gap-4 lg:gap-5.5">
             <section>
               <SectionLabel>よく遊んだコンテンツ</SectionLabel>
-              {/* タグ機能の実装待ち */}
-              <ComingSoon className="h-12 bg-card" />
+              {/* 上位2つは accent のチップで強調、残りは枠線のみ（design_handoff 1c） */}
+              {topTags.length > 0 ? (
+                <div className="flex flex-wrap gap-1.75">
+                  {topTags.map(([name, count], index) => (
+                    <span
+                      key={name}
+                      className={cn(
+                        "rounded-full px-3 py-1 text-xs lg:text-[12.5px]",
+                        index < 2
+                          ? "bg-accent font-semibold text-accent-foreground"
+                          : "border bg-card text-ink-soft",
+                      )}
+                    >
+                      {name}
+                      <span className="ml-1 text-[10.5px] opacity-70">{count}回</span>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="rounded-[11px] border bg-card px-3 py-3 text-xs text-muted-foreground">
+                  この期間にタグを付けた記録はありません
+                </p>
+              )}
             </section>
 
             {/* AIインサイト。保存済みの傾向文を出し、ボタンで作る/作り直す */}

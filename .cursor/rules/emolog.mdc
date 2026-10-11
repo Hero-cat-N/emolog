@@ -1,0 +1,40 @@
+---
+description: エモログ（Next.js 16 + Prisma 7 + Supabase + Gemini）のプロジェクト共通ルール
+globs:
+alwaysApply: true
+---
+
+# エモログ プロジェクトルール
+
+## 前提
+
+- Next.js は 16 系。API や規約が学習データと異なることがあるので、書く前に `node_modules/next/dist/docs/` の該当ガイドを確認する
+  - `middleware.ts` ではなく `proxy.ts`、`params` / `searchParams` は Promise（`await` してから読む）
+- Prisma は 7 系。接続設定は `prisma.config.ts`、Client は `lib/generated/prisma`（生成物なので編集しない）
+- 返答・コメント・コミットメッセージは日本語で書く
+
+## コード
+
+- 型は TypeScript で正確に書き、`any` は使わない
+- 整形は Prettier（`npm run format`）、静的解析は ESLint（`npm run lint`）。コミット前に `npx tsc --noEmit` と `npm run lint` を通す
+- 既存のコメントの密度・書き方に合わせる（「何をしているか」より「なぜそうしているか」を書く）
+- `"use client"` のファイルにサーバー専用のもの（`prisma` など）を import しない。クライアントと共有する純粋関数は別ファイルに置く
+
+## データとセキュリティ
+
+- ログ・タグ・AI結果を読む/書く/消すときは、必ず `userId` でも絞り込み、他人のデータに触れないようにする
+- Route Handler では最初に Supabase でログインを確認し、未ログインなら 401 を返す
+- 環境変数は `.env.local` に置く。APIキーなどの秘密に `NEXT_PUBLIC_` を付けない
+- スキーマを変えたら `npx prisma migrate dev --name <内容>` でマイグレーションを作り、開発サーバーを再起動する
+
+## AI（Gemini）
+
+- Gemini の呼び出しは `lib/ai/gemini.ts` の `generateText` を経由する（タイムアウト・503 の再試行が入っている）
+- AI 生成はボタンを押したときだけ行い、結果は DB に保存して使い回す。生成に成功したら `ai_usages` に記録し、1ユーザー1日3回の上限を守る
+- 件数・平均などの数字はコードで計算してから AI に渡す（AI に計算させない）
+- AI 由来の UI は ✨ と accent 配色（`bg-accent` / `text-accent-foreground`）でラベリングする
+
+## デザイン
+
+- 色・余白・コンポーネントの使い分けは `design.md` に従う
+- スマホ（375px）〜PC（1440px）に対応し、モバイルファーストで書く（`lg:` で PC 向けに上書き）

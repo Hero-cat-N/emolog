@@ -61,44 +61,44 @@
 }
 
 :root {
-  --background: #FCF8F2;
-  --foreground: #3B2A1F;
-  --card: #FFFFFF;
-  --card-foreground: #3B2A1F;
-  --popover: #FFFFFF;
-  --popover-foreground: #3B2A1F;
-  --primary: #D85528;
-  --primary-foreground: #FCF8F2;
-  --secondary: #F5EEE3;
-  --secondary-foreground: #3B2A1F;
-  --muted: #F5EEE3;
-  --muted-foreground: #B58A5F;
-  --accent: #FBEEE7;
-  --accent-foreground: #C74C1B;
-  --destructive: #CC3B2B;
-  --border: #E8DECF;
-  --input: #E8DECF;
-  --ring: #D85528;
-  --chart-1: #2E9E6B;
-  --chart-2: #8F8578;
-  --chart-3: #5B7FC7;
-  --chart-4: #D85528;
-  --chart-5: #8B78C8;
+  --background: #fcf8f2;
+  --foreground: #3b2a1f;
+  --card: #ffffff;
+  --card-foreground: #3b2a1f;
+  --popover: #ffffff;
+  --popover-foreground: #3b2a1f;
+  --primary: #d85528;
+  --primary-foreground: #fcf8f2;
+  --secondary: #f5eee3;
+  --secondary-foreground: #3b2a1f;
+  --muted: #f5eee3;
+  --muted-foreground: #b58a5f;
+  --accent: #fbeee7;
+  --accent-foreground: #c74c1b;
+  --destructive: #cc3b2b;
+  --border: #e8decf;
+  --input: #e8decf;
+  --ring: #d85528;
+  --chart-1: #2e9e6b;
+  --chart-2: #8f8578;
+  --chart-3: #5b7fc7;
+  --chart-4: #d85528;
+  --chart-5: #8b78c8;
   --radius: 0.625rem;
-  --emotion-happy: #2E9E6B;
-  --emotion-neutral: #8F8578;
-  --emotion-sad: #5B7FC7;
-  --emotion-angry: #D85528;
-  --emotion-tired: #8B78C8;
-  --brand: #D85528;
-  --brand-deep: #C74C1B;
-  --brand-light: #E3673B;
+  --emotion-happy: #2e9e6b;
+  --emotion-neutral: #8f8578;
+  --emotion-sad: #5b7fc7;
+  --emotion-angry: #d85528;
+  --emotion-tired: #8b78c8;
+  --brand: #d85528;
+  --brand-deep: #c74c1b;
+  --brand-light: #e3673b;
   /* ヘッダー・ナビ・ペインの区切り線（カードの枠 --border より一段薄い） */
-  --line: #F0E7D8;
+  --line: #f0e7d8;
   /* 本文より一段弱い文字（ナビの非アクティブ・セクションラベル） */
-  --ink-soft: #6E5847;
+  --ink-soft: #6e5847;
   /* AIカード（accent 背景）の枠線 */
-  --accent-border: #F6D9CB;
+  --accent-border: #f6d9cb;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -169,7 +169,7 @@
 /* 主要CTA・連続記録カードのブランドグラデーション（design.md 7節）。
    @utility で定義すると lg: などのバリアントも付けられる */
 @utility bg-brand-gradient {
-  background-image: linear-gradient(135deg, #E3673B, #D24F1C);
+  background-image: linear-gradient(135deg, #e3673b, #d24f1c);
 }
 
 /* カード内部要素の基本影（design.md 4節） */

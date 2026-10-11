@@ -20,13 +20,7 @@ import { cn } from "@/lib/utils";
 
 // 純粋なヘルパー（LogView 型 / EMOTION_UI / formatLoggedDate 等）は log-card-utils.ts にある。
 // Server Component から使うものを "use client" のこのファイルに置くと呼び出せなくなるため分離した。
-import {
-  EMOTION_FALLBACK,
-  EMOTION_UI,
-  formatLoggedDate,
-  type LogAiView,
-  type LogView,
-} from "./log-card-utils";
+import { EMOTION_FALLBACK, EMOTION_UI, formatLoggedDate, type LogView } from "./log-card-utils";
 
 // ヘッダー右側の四角いアイコンボタン（34×34）
 const iconButton =
@@ -101,7 +95,7 @@ export function LogDetailBody({
       </div>
 
       <aside className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
-        <LogAiPanel logId={log.id} ai={log.ai} remaining={aiRemaining} />
+        <LogAiPanel log={log} remaining={aiRemaining} />
       </aside>
 
       {/* 前日 / 翌日 */}
@@ -152,15 +146,15 @@ function LogSection({ label, value }: { label: string; value?: string | null }) 
 
 // ── AI列（AI分析 + アクション） ──
 export function LogAiPanel({
-  logId,
-  ai,
+  log,
   remaining,
 }: {
-  logId: string;
-  ai: LogAiView | null;
-  // 今日あと何回AI生成できるか（分析・ブログ下書きの合計）
+  log: LogView;
+  // 今日あと何回AI生成できるか（分析・ブログ下書き・インサイトの合計）
   remaining: number;
 }) {
+  const logId = log.id;
+  const ai = log.ai;
   const router = useRouter();
   // 無料枠のAIは返事に数秒〜十数秒かかるので、その間はボタンを止めて二重送信を防ぐ
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -186,13 +180,47 @@ export function LogAiPanel({
     }
   }
 
-  async function handleCopyBlog(text: string) {
+  async function copyText(text: string, successMessage: string) {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("下書きをコピーしました");
+      toast.success(successMessage);
     } catch {
       toast.error("コピーできませんでした");
     }
+  }
+
+  // 「テキストをコピー」用。日付・気分・タグ・4項目を、そのまま貼り付けて読める形にする
+  function buildLogText() {
+    const { ymd } = formatLoggedDate(log.loggedDate);
+    return [
+      `${ymd}（気分: ${log.emotionLabel ?? "未設定"}）`,
+      log.tags.length > 0 ? `タグ: ${log.tags.join("、")}` : null,
+      `今日やったこと: ${log.didToday}`,
+      `良かったこと: ${log.goodThing}`,
+      `モヤったこと: ${log.badThing ?? "なし"}`,
+      `明日やること: ${log.tomorrowPlan}`,
+    ]
+      .filter((line) => line !== null)
+      .join("\n");
+  }
+
+  // 「SNS にシェア」。投稿文は AI のひとこと要約があればそれを、無ければ「今日やったこと」を使う。
+  // スマホは OS の共有シート(Web Share API)、使えないブラウザでは X の投稿画面を開く
+  async function handleShare() {
+    const text = `${ai?.summary ?? log.didToday} #エモログ`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ text });
+      } catch {
+        // 共有シートを閉じただけのときも例外になるので、何もしない
+      }
+      return;
+    }
+    window.open(
+      `https://x.com/intent/post?text=${encodeURIComponent(text)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
   }
 
   async function handleAnalyze() {
@@ -275,7 +303,7 @@ export function LogAiPanel({
                 <div className="mt-2 flex gap-3">
                   <button
                     type="button"
-                    onClick={() => handleCopyBlog(ai.blogDraft!)}
+                    onClick={() => copyText(ai.blogDraft!, "下書きをコピーしました")}
                     className="flex items-center gap-1 text-[11.5px] font-medium text-accent-foreground"
                   >
                     <Copy className="size-3.5" strokeWidth={1.8} /> コピー
@@ -302,7 +330,9 @@ export function LogAiPanel({
                 </button>
                 {/* 下書きは分析結果も材料にするので、分析が済むまでは押せない */}
                 {!ai && (
-                  <p className="mt-1 text-[10.5px] text-muted-foreground">AI分析のあとで生成できます</p>
+                  <p className="mt-1 text-[10.5px] text-muted-foreground">
+                    AI分析のあとで生成できます
+                  </p>
                 )}
               </>
             )}
@@ -329,15 +359,23 @@ export function LogAiPanel({
         </p>
       </div>
 
-      {/* アクション（シェア・コピーは未実装） */}
+      {/* アクション */}
       <div className="flex flex-col gap-2 px-5 py-4">
         <div className="grid grid-cols-2 gap-2">
-          <span className={cn(outlineButton, "opacity-50")}>
+          <button
+            type="button"
+            onClick={handleShare}
+            className={cn(outlineButton, "hover:bg-accent")}
+          >
             <Share2 className="size-4" strokeWidth={1.8} /> SNS にシェア
-          </span>
-          <span className={cn(outlineButton, "opacity-50")}>
+          </button>
+          <button
+            type="button"
+            onClick={() => copyText(buildLogText(), "記録をコピーしました")}
+            className={cn(outlineButton, "hover:bg-accent")}
+          >
             <Copy className="size-4" strokeWidth={1.8} /> テキストをコピー
-          </span>
+          </button>
         </div>
         <button
           type="button"
@@ -374,11 +412,21 @@ function NeighborLink({ side, log }: { side: "older" | "newer"; log: LogView | n
   const emotion = (log.emotionCode && EMOTION_UI[log.emotionCode]) || EMOTION_FALLBACK;
 
   return (
-    <Link href={`/logs/${log.id}`} className={cn(base, "transition-colors duration-150 hover:bg-muted")}>
+    <Link
+      href={`/logs/${log.id}`}
+      className={cn(base, "transition-colors duration-150 hover:bg-muted")}
+    >
       <Chevron className="size-4 shrink-0 text-ink-soft" />
       <div className="min-w-0">
-        <p className="text-[10px] text-muted-foreground">{formatLoggedDate(log.loggedDate).short}</p>
-        <p className={cn("flex items-center gap-1 truncate text-xs text-foreground", isNewer && "justify-end")}>
+        <p className="text-[10px] text-muted-foreground">
+          {formatLoggedDate(log.loggedDate).short}
+        </p>
+        <p
+          className={cn(
+            "flex items-center gap-1 truncate text-xs text-foreground",
+            isNewer && "justify-end",
+          )}
+        >
           <emotion.icon className="size-3.5 shrink-0" style={{ color: emotion.color }} />
           {log.emotionLabel ?? "未設定"}
         </p>
