@@ -15,12 +15,11 @@ export const DEFAULT_PERIOD: PeriodDays = 30;
 
 // URL の ?period= の値（文字列 or 未指定）を、集計に使える日数に変換する。
 // URL は誰でも手で書き換えられるので、どんな値が来ても PeriodDays を返すこと。
-// 例: "90" → 90 / undefined → 30 / "abc" → ? / "7" → ?
+// 例: "90" → 90 / "7" → 7 / undefined → 30 / "abc" → 30
 export function parsePeriod(value: string | string[] | undefined): PeriodDays {
   const days = Number(value);
-  const found = PERIODS.find((p) => p.days === days); // PERIODS
+  const found = PERIODS.find((p) => p.days === days);
 
-  // 見つかった
   if (found) {
     return found.days;
   } else {
