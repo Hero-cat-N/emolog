@@ -32,15 +32,14 @@
 
 ### セマンティック（感情カラー）
 
-感情は emotions マスタの5種に対応。彩度をブランドに寄せた暖色系トーンで統一。
+感情は emotions マスタの4種に対応。彩度をブランドに寄せた暖色系トーンで統一。
 
 | 感情 | HEX | メモ |
 |---|---|---|
 | 😄 楽しい | `#2E9E6B` | positive（green） |
 | 😐 普通 | `#8F8578` | neutral（warm gray） |
 | 😞 悲しい | `#5B7FC7` | sad（blue） |
-| 😤 イライラ | `#D85528` | angry（brand orange と共用） |
-| 😴 疲れ | `#8B78C8` | tired（purple） |
+| 😤 モヤモヤ | `#D85528` | angry（brand orange と共用） |
 
 補助: 成功 `#2E9E6B` / 警告 `#E09A28` / エラー `#CC3B2B`
 
@@ -83,7 +82,6 @@ extend: {
       neutral: "#8F8578",
       sad: "#5B7FC7",
       angry: "#D85528",
-      tired: "#8B78C8",
     },
     brand: {
       DEFAULT: "#D85528",
