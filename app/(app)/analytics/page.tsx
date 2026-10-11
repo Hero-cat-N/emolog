@@ -99,7 +99,7 @@ export default async function AnalyticsPage({
     <AppShell
       header={
         <div className="flex items-center justify-between">
-          <PageHeading>感情ログ</PageHeading>
+          <PageHeading>分析</PageHeading>
           <span className="text-[11.5px] text-muted-foreground lg:text-[12.5px]">
             直近{periodDays}日間
           </span>

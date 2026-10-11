@@ -122,9 +122,7 @@ function EmotionBanner({ log }: { log: LogView }) {
       </span>
       <div>
         <p className="text-[15px] font-bold text-foreground">{log.emotionLabel ?? "未設定"}</p>
-        <p className="mt-0.5 text-[11.5px] text-muted-foreground">
-          自動判定 · <span className="text-accent-foreground">手動で変更する</span>
-        </p>
+        <p className="mt-0.5 text-[11.5px] text-muted-foreground">その日の気分</p>
       </div>
     </div>
   );
