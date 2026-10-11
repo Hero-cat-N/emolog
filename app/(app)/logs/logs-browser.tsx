@@ -23,8 +23,7 @@ const EMOTION_LEGEND = [
   { code: "fun", label: "楽しい", color: "#2E9E6B" },
   { code: "normal", label: "普通", color: "#8F8578" },
   { code: "sad", label: "悲しい", color: "#5B7FC7" },
-  { code: "frustrate", label: "イライラ", color: "#D85528" },
-  { code: "tired", label: "疲れ", color: "#8B78C8" },
+  { code: "frustrate", label: "モヤモヤ", color: "#D85528" },
 ];
 const EMOTION_COLOR: Record<string, string> = Object.fromEntries(
   EMOTION_LEGEND.map((e) => [e.code, e.color]),

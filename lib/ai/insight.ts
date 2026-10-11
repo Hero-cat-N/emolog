@@ -17,13 +17,13 @@ export type InsightInput = {
   summaries: { date: string; summary: string; keywords: string[] }[];
 };
 
-// 感情スコア(楽しい5 / 普通3 / 疲れ2 / 悲しい・イライラ1)の平均を、気分の言葉に置き換える。
+// 感情スコア(楽しい5 / 普通3 / 悲しい・モヤモヤ1)の平均を、気分の言葉に置き換える。
 // 数字のまま渡すと AI が「平均3.2」のようにそのまま書いてしまうので、言葉だけを渡す
 export function describeMood(score: number | null): string {
   if (score === null) return "記録なし";
   if (score >= 3.5) return "楽しい寄りの気分";
   if (score >= 2.0) return "落ち着いた（ふつう寄りの）気分";
-  return "疲れ・モヤモヤ寄りの気分";
+  return "悲しい・モヤモヤ寄りの気分";
 }
 
 function buildInsightPrompt(input: InsightInput): string {

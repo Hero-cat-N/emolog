@@ -6,7 +6,6 @@
 export const EMOTION_SCORE: Record<string, number> = {
   fun: 5,
   normal: 3,
-  tired: 2,
   sad: 1,
   frustrate: 1,
 };

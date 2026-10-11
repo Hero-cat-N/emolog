@@ -23,7 +23,7 @@ const MOODS = [
   { value: "fun", icon: Laugh, label: "楽しい" },
   { value: "normal", icon: Meh, label: "普通" },
   { value: "sad", icon: Frown, label: "悲しい" },
-  { value: "frustrate", icon: Angry, label: "イライラ" },
+  { value: "frustrate", icon: Angry, label: "モヤモヤ" },
 ] as const;
 
 // 新規投稿(/post)と編集(/logs/[id]/edit)の両方で使う本文フォーム。
